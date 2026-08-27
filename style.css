@@ -332,6 +332,7 @@ textarea { resize: vertical; }
 }
 
 /* ===== LOADING SCREEN MỚI ===== */
+/* ===== LOADING SCREEN ===== */
 #loading-screen {
   position: fixed;
   inset: 0;
@@ -372,23 +373,20 @@ textarea { resize: vertical; }
   font-weight: 600;
 }
 
-/* Animation ẩn màn hình loading */
 .fade-out {
   opacity: 0;
   transition: opacity 0.5s ease;
   pointer-events: none;
 }
 
-/* Animation bung màn hình chính ("Bùm") */
+/* ===== MAIN CONTENT (KHÔNG SCALE) ===== */
 #main-content {
   opacity: 1;
-  transform: scale(1);
-  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: opacity 0.6s ease;
 }
 
 #main-content.hidden {
   opacity: 0;
-  transform: scale(0.8);
   pointer-events: none;
 }
 
