@@ -5,227 +5,242 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Annotated Reader</title>
   <link rel="stylesheet" href="style.css">
+  <!-- ===== Lottie Player (thay vì DotLottie) ===== -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
   <!-- ===== MÀN HÌNH LOADING ===== -->
-  <div id="app-loading" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;flex-direction:column;">
-    <div style="font-size:24px;color:#7654d8;font-weight:600;margin-bottom:12px;">✦</div>
-    <p style="color:#555;font-size:16px;">Đang tải dữ liệu...</p>
+  <div id="loading-screen">
+    <lottie-player
+      id="bookAnim"
+      background="transparent"
+      speed="0.75"
+      loop
+      autoplay
+      style="width: 180px; height: 180px;">
+    </lottie-player>
+    <div class="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+    <span id="progress-text">0%</span>
   </div>
 
-  <div id="app">
-    <!-- ================= LIBRARY ================= -->
-    <section id="libraryView" class="view active">
-      <header class="topbar">
-        <div class="brand">
-          <span class="brand-mark">✦</span>
-          <span>Annotated Reader</span>
-        </div>
-        <div class="top-actions">
-          <button class="btn ghost" id="importBtn">Import</button>
-          <button class="btn ghost" id="exportBtn">Export</button>
-          <button class="btn primary" id="addStoryBtn">＋ Add Story</button>
-          <input type="file" id="importInput" accept=".json" hidden>
-        </div>
-      </header>
-      <main class="library-container">
-        <div class="page-heading">
-          <div>
-            <p class="eyebrow">YOUR LIBRARY</p>
-            <h1>Stories</h1>
-            <p class="muted">Your personal annotated reading library.</p>
+  <!-- ===== MÀN HÌNH CHÍNH ===== -->
+  <div id="main-content" class="hidden">
+    <div id="app">
+      <!-- ================= LIBRARY ================= -->
+      <section id="libraryView" class="view active">
+        <header class="topbar">
+          <div class="brand">
+            <span class="brand-mark">✦</span>
+            <span>Annotated Reader</span>
           </div>
-        </div>
-        <div id="storyGrid" class="story-grid"></div>
-      </main>
-    </section>
-
-    <!-- ================= STORY ================= -->
-    <section id="storyView" class="view">
-      <header class="topbar">
-        <button class="btn ghost" id="backLibraryBtn">← Library</button>
-        <div class="brand small-brand">
-          <span class="brand-mark">✦</span>
-          <span id="storyHeaderTitle">Story</span>
-        </div>
-        <div class="top-actions">
-          <button class="btn ghost" id="storyOverviewBtn">Overview</button>
-          <button class="btn ghost" id="storyEditBtn">Edit Story</button>
-        </div>
-      </header>
-      <main class="story-container">
-        <div class="story-hero">
-          <div class="cover-wrapper">
-            <img id="storyCover" class="story-cover" alt="">
-            <div id="coverPlaceholder" class="cover-placeholder">
-              <span>＋</span>
-              <small>Add Cover</small>
-            </div>
-            <input type="file" id="coverInput" accept="image/*" hidden>
+          <div class="top-actions">
+            <button class="btn ghost" id="importBtn">Import</button>
+            <button class="btn ghost" id="exportBtn">Export</button>
+            <button class="btn primary" id="addStoryBtn">＋ Add Story</button>
+            <input type="file" id="importInput" accept=".json" hidden>
           </div>
-          <div class="story-info">
-            <input id="storyTitleInput" class="story-title-input" placeholder="Untitled Story">
-            <textarea id="storyDescriptionInput" class="story-description" placeholder="Add a short description..."></textarea>
-            <div class="story-actions">
-              <button class="btn primary" id="saveStoryBtn">Save Story</button>
-              <button class="btn danger-outline" id="deleteStoryBtn">Delete Story</button>
-            </div>
-          </div>
-        </div>
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">STORY CONTENT</p>
-            <h2>Chapters</h2>
-          </div>
-          <button class="circle-add" id="addChapterBtn">＋</button>
-        </div>
-        <div id="chapterList" class="chapter-list"></div>
-      </main>
-    </section>
-
-    <!-- ================= READER ================= -->
-    <section id="readerView" class="view">
-      <header class="reader-topbar">
-        <button class="icon-btn" id="readerBackBtn" title="Back">←</button>
-        <div class="reader-heading">
-          <span id="readerStoryName"></span>
-          <strong id="readerChapterName"></strong>
-        </div>
-        <div class="reader-actions">
-          <button class="btn ghost" id="overviewBtn">Overview</button>
-          <button class="btn ghost" id="toggleEditBtn">Edit Mode</button>
-        </div>
-      </header>
-      <main class="reader-layout">
-        <div class="reader-toolbar">
-          <button class="nav-btn reader-toolbar-btn" id="topChapterBackBtn">← Prev</button>
-          <button class="nav-btn reader-toolbar-btn secondary" id="topChapterListBtn">☰ Contents</button>
-          <button class="nav-btn reader-toolbar-btn" id="topChapterContinueBtn">Next →</button>
-        </div>
-
-        <article class="reader-paper">
-          <div id="readerContent" class="reader-content"></div>
-          <div id="readerNotesArea"></div>
-          <div class="chapter-navigation">
-            <button class="nav-btn" id="chapterBackBtn">← Previous Chapter</button>
-            <button class="nav-btn secondary" id="chapterListBtn">☰ Contents</button>
-            <button class="nav-btn" id="chapterContinueBtn">Next Chapter →</button>
-          </div>
-        </article>
-      </main>
-
-      <!-- EDITOR -->
-      <div id="editorPanel" class="editor-panel">
-        <div class="editor-inner">
-          <div class="editor-header">
+        </header>
+        <main class="library-container">
+          <div class="page-heading">
             <div>
-              <p class="eyebrow">EDIT MODE</p>
-              <h2>Edit Chapter</h2>
+              <p class="eyebrow">YOUR LIBRARY</p>
+              <h1>Stories</h1>
+              <p class="muted">Your personal annotated reading library.</p>
             </div>
-            <button class="btn ghost" id="closeEditorBtn">Done</button>
           </div>
-          <label>Chapter Title</label>
-          <input id="chapterTitleInput" class="field" placeholder="Chapter title...">
-          <div class="editor-toolbar">
-            <span>Select text below to create a note.</span>
-            <button class="btn ghost" id="saveChapterBtn">Save Chapter</button>
-          </div>
-          <div id="chapterEditor" class="chapter-editor" contenteditable="true"></div>
-        </div>
-      </div>
-    </section>
+          <div id="storyGrid" class="story-grid"></div>
+        </main>
+      </section>
 
-    <!-- ================= OVERVIEW ================= -->
-    <section id="overviewView" class="view">
-      <header class="topbar">
-        <button class="btn ghost" id="overviewBackBtn">← Back</button>
-        <div class="brand">
-          <span class="brand-mark">✦</span>
-          <span>Overview</span>
-        </div>
-        <div></div>
-      </header>
-      <main class="overview-container">
-        <div class="overview-heading">
-          <p class="eyebrow">STORY OVERVIEW</p>
-          <h1 id="overviewStoryTitle"></h1>
-          <p class="muted">Search notes, characters, terms and chapter annotations.</p>
-        </div>
-        <div class="search-box">
-          <span>⌕</span>
-          <input id="noteSearch" placeholder="Search notes, terms, characters...">
-        </div>
-        <div id="searchResults"></div>
-        <div class="overview-grid">
-          <section class="overview-card">
-            <div class="card-heading">
-              <div>
-                <p class="eyebrow">GLOBAL</p>
-                <h2>Global Notes</h2>
+      <!-- ================= STORY ================= -->
+      <section id="storyView" class="view">
+        <header class="topbar">
+          <button class="btn ghost" id="backLibraryBtn">← Library</button>
+          <div class="brand small-brand">
+            <span class="brand-mark">✦</span>
+            <span id="storyHeaderTitle">Story</span>
+          </div>
+          <div class="top-actions">
+            <button class="btn ghost" id="storyOverviewBtn">Overview</button>
+            <button class="btn ghost" id="storyEditBtn">Edit Story</button>
+          </div>
+        </header>
+        <main class="story-container">
+          <div class="story-hero">
+            <div class="cover-wrapper">
+              <img id="storyCover" class="story-cover" alt="">
+              <div id="coverPlaceholder" class="cover-placeholder">
+                <span>＋</span>
+                <small>Add Cover</small>
               </div>
-              <button class="small-add" id="addGlobalNoteBtn">＋</button>
+              <input type="file" id="coverInput" accept="image/*" hidden>
             </div>
-            <div id="globalNotesList"></div>
-          </section>
-          <section class="overview-card">
-            <div class="card-heading">
-              <div>
-                <p class="eyebrow">CHAPTER</p>
-                <h2>Chapter Notes</h2>
+            <div class="story-info">
+              <input id="storyTitleInput" class="story-title-input" placeholder="Untitled Story">
+              <textarea id="storyDescriptionInput" class="story-description" placeholder="Add a short description..."></textarea>
+              <div class="story-actions">
+                <button class="btn primary" id="saveStoryBtn">Save Story</button>
+                <button class="btn danger-outline" id="deleteStoryBtn">Delete Story</button>
               </div>
             </div>
-            <div id="chapterNotesList"></div>
-          </section>
-        </div>
-      </main>
-    </section>
-
-    <!-- ================= NOTE POPUP ================= -->
-    <div id="notePopup" class="note-popup">
-      <div class="popup-header">
-        <strong id="popupTitle">Add Note</strong>
-        <button id="closePopupBtn">×</button>
-      </div>
-      <div id="popupStepOne">
-        <p class="popup-selected">"<span id="selectedTextPreview"></span>"</p>
-        <label>Note Type</label>
-        <div class="note-type-row">
-          <button class="type-btn active" data-type="chapter">Chapter Note</button>
-          <button class="type-btn" data-type="global">Global Note</button>
-        </div>
-        <button class="btn primary full" id="confirmNoteBtn">Confirm</button>
-      </div>
-      <div id="popupEditor" hidden>
-        <label>Note</label>
-        <textarea id="popupNoteText" placeholder="Write your note..."></textarea>
-        <div class="illustration-section">
-          <label>Illustration</label>
-          <div id="imageSlots" class="image-slots"></div>
-        </div>
-        <div class="source-fields">
-          <input id="popupCaption" class="field" placeholder="Caption (optional)">
-          <input id="popupSource" class="field" placeholder="Source (optional)">
-        </div>
-        <button class="btn primary full" id="saveNoteBtn">Save Note</button>
-      </div>
-    </div>
-
-    <!-- ================= CHAPTER LIST DRAWER ================= -->
-    <div id="chapterDrawer" class="drawer-overlay">
-      <div class="chapter-drawer">
-        <div class="drawer-header">
-          <div>
-            <p class="eyebrow">STORY</p>
-            <h2>Chapters</h2>
           </div>
-          <button id="closeDrawerBtn">×</button>
-        </div>
-        <div id="drawerChapterList"></div>
-      </div>
-    </div>
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">STORY CONTENT</p>
+              <h2>Chapters</h2>
+            </div>
+            <button class="circle-add" id="addChapterBtn">＋</button>
+          </div>
+          <div id="chapterList" class="chapter-list"></div>
+        </main>
+      </section>
 
-    <!-- ================= TOAST ================= -->
-    <div id="toast"></div>
+      <!-- ================= READER ================= -->
+      <section id="readerView" class="view">
+        <header class="reader-topbar">
+          <button class="icon-btn" id="readerBackBtn" title="Back">←</button>
+          <div class="reader-heading">
+            <span id="readerStoryName"></span>
+            <strong id="readerChapterName"></strong>
+          </div>
+          <div class="reader-actions">
+            <button class="btn ghost" id="overviewBtn">Overview</button>
+            <button class="btn ghost" id="toggleEditBtn">Edit Mode</button>
+          </div>
+        </header>
+        <main class="reader-layout">
+          <div class="reader-toolbar">
+            <button class="nav-btn reader-toolbar-btn" id="topChapterBackBtn">← Prev</button>
+            <button class="nav-btn reader-toolbar-btn secondary" id="topChapterListBtn">☰ Contents</button>
+            <button class="nav-btn reader-toolbar-btn" id="topChapterContinueBtn">Next →</button>
+          </div>
+
+          <article class="reader-paper">
+            <div id="readerContent" class="reader-content"></div>
+            <div id="readerNotesArea"></div>
+            <div class="chapter-navigation">
+              <button class="nav-btn" id="chapterBackBtn">← Previous Chapter</button>
+              <button class="nav-btn secondary" id="chapterListBtn">☰ Contents</button>
+              <button class="nav-btn" id="chapterContinueBtn">Next Chapter →</button>
+            </div>
+          </article>
+        </main>
+
+        <!-- EDITOR -->
+        <div id="editorPanel" class="editor-panel">
+          <div class="editor-inner">
+            <div class="editor-header">
+              <div>
+                <p class="eyebrow">EDIT MODE</p>
+                <h2>Edit Chapter</h2>
+              </div>
+              <button class="btn ghost" id="closeEditorBtn">Done</button>
+            </div>
+            <label>Chapter Title</label>
+            <input id="chapterTitleInput" class="field" placeholder="Chapter title...">
+            <div class="editor-toolbar">
+              <span>Select text below to create a note.</span>
+              <button class="btn ghost" id="saveChapterBtn">Save Chapter</button>
+            </div>
+            <div id="chapterEditor" class="chapter-editor" contenteditable="true"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= OVERVIEW ================= -->
+      <section id="overviewView" class="view">
+        <header class="topbar">
+          <button class="btn ghost" id="overviewBackBtn">← Back</button>
+          <div class="brand">
+            <span class="brand-mark">✦</span>
+            <span>Overview</span>
+          </div>
+          <div></div>
+        </header>
+        <main class="overview-container">
+          <div class="overview-heading">
+            <p class="eyebrow">STORY OVERVIEW</p>
+            <h1 id="overviewStoryTitle"></h1>
+            <p class="muted">Search notes, characters, terms and chapter annotations.</p>
+          </div>
+          <div class="search-box">
+            <span>⌕</span>
+            <input id="noteSearch" placeholder="Search notes, terms, characters...">
+          </div>
+          <div id="searchResults"></div>
+          <div class="overview-grid">
+            <section class="overview-card">
+              <div class="card-heading">
+                <div>
+                  <p class="eyebrow">GLOBAL</p>
+                  <h2>Global Notes</h2>
+                </div>
+                <button class="small-add" id="addGlobalNoteBtn">＋</button>
+              </div>
+              <div id="globalNotesList"></div>
+            </section>
+            <section class="overview-card">
+              <div class="card-heading">
+                <div>
+                  <p class="eyebrow">CHAPTER</p>
+                  <h2>Chapter Notes</h2>
+                </div>
+              </div>
+              <div id="chapterNotesList"></div>
+            </section>
+          </div>
+        </main>
+      </section>
+
+      <!-- ================= NOTE POPUP ================= -->
+      <div id="notePopup" class="note-popup">
+        <div class="popup-header">
+          <strong id="popupTitle">Add Note</strong>
+          <button id="closePopupBtn">×</button>
+        </div>
+        <div id="popupStepOne">
+          <p class="popup-selected">"<span id="selectedTextPreview"></span>"</p>
+          <label>Note Type</label>
+          <div class="note-type-row">
+            <button class="type-btn active" data-type="chapter">Chapter Note</button>
+            <button class="type-btn" data-type="global">Global Note</button>
+          </div>
+          <button class="btn primary full" id="confirmNoteBtn">Confirm</button>
+        </div>
+        <div id="popupEditor" hidden>
+          <label>Note</label>
+          <textarea id="popupNoteText" placeholder="Write your note..."></textarea>
+          <div class="illustration-section">
+            <label>Illustration</label>
+            <div id="imageSlots" class="image-slots"></div>
+          </div>
+          <div class="source-fields">
+            <input id="popupCaption" class="field" placeholder="Caption (optional)">
+            <input id="popupSource" class="field" placeholder="Source (optional)">
+          </div>
+          <button class="btn primary full" id="saveNoteBtn">Save Note</button>
+        </div>
+      </div>
+
+      <!-- ================= CHAPTER LIST DRAWER ================= -->
+      <div id="chapterDrawer" class="drawer-overlay">
+        <div class="chapter-drawer">
+          <div class="drawer-header">
+            <div>
+              <p class="eyebrow">STORY</p>
+              <h2>Chapters</h2>
+            </div>
+            <button id="closeDrawerBtn">×</button>
+          </div>
+          <div id="drawerChapterList"></div>
+        </div>
+      </div>
+
+      <!-- ================= TOAST ================= -->
+      <div id="toast"></div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
