@@ -736,6 +736,8 @@ function openChapter(chapterId) {
   showView("readerView");
   closeEditor();
   saveNavigationState();
+  // ===== THÊM DÒNG NÀY =====
+  window.scrollTo(0, 0);
 }
 function renderReader() {
   const story = getStory();
