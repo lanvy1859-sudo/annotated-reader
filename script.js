@@ -156,7 +156,7 @@ function clearNavigationState() {
 
 // ================= INITIALIZE =================
 async function initApp() {
-  startProgress(); // Bắt đầu progress bar
+  startProgress();
 
   await loadFromSupabase();
 
@@ -183,6 +183,16 @@ async function initApp() {
       showView('storyView');
       completeLoading();
       return;
+    } else if (savedNav.view === 'overviewView' && savedNav.storyId && storyExists) {
+      currentStoryId = savedNav.storyId;
+      const story = getStory();
+      if (story) {
+        document.getElementById("overviewStoryTitle").textContent = story.title;
+        renderOverview();
+        showView('overviewView');
+        completeLoading();
+        return;
+      }
     }
   }
 
@@ -376,30 +386,25 @@ function startProgress() {
 
   progressInterval = setInterval(() => {
     if (progress < 98) {
-      // tăng đều 2% mỗi lần như ban đầu
       progress += 2;
-      if (progress > 98) progress = 98; // không vượt quá 98
+      if (progress > 98) progress = 98;
       updateProgress(progress);
     } else {
-      // dừng ở 98, không tự động lên 100
       clearInterval(progressInterval);
       progressInterval = null;
     }
   }, 50);
 }
 
-// Hàm hoàn tất – gọi khi dữ liệu đã sẵn sàng
 function completeLoading() {
   if (progressInterval) {
     clearInterval(progressInterval);
     progressInterval = null;
   }
-  // Nếu chưa lên 100, cho lên 100 ngay
   if (progress < 100) {
     progress = 100;
     updateProgress(progress);
   }
-  // Đợi một chút để người dùng thấy 100% rồi mới ẩn
   setTimeout(() => {
     finishLoading();
   }, 200);
@@ -1484,7 +1489,7 @@ function renderGlobalNotes() {
   });
 }
 
-// ================= RENDER CHAPTER NOTES (ACCORDION + SORT) =================
+// ================= RENDER CHAPTER NOTES (DANH SÁCH PHẲNG) =================
 let chapterSortOrder = localStorage.getItem('chapter_sort_order') || 'desc';
 
 function renderChapterNotes() {
@@ -1510,22 +1515,8 @@ function renderChapterNotes() {
     return;
   }
 
-  // 1. Nhóm theo chapter
-  const grouped = {};
-  allNotes.forEach(note => {
-    const key = note.chapterId;
-    if (!grouped[key]) {
-      grouped[key] = {
-        chapterId: key,
-        chapterNumber: note.chapterNumber,
-        notes: []
-      };
-    }
-    grouped[key].notes.push(note);
-  });
-
-  // 2. Chuyển thành mảng và sắp xếp theo chapter number
-  const sortedChapters = Object.values(grouped).sort((a, b) => {
+  // Sắp xếp theo chapter number
+  allNotes.sort((a, b) => {
     if (chapterSortOrder === 'asc') {
       return a.chapterNumber - b.chapterNumber;
     } else {
@@ -1533,9 +1524,7 @@ function renderChapterNotes() {
     }
   });
 
-  // 3. Render HTML
   let html = '';
-  
   // Thêm nút sắp xếp
   html += `
     <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
@@ -1545,33 +1534,13 @@ function renderChapterNotes() {
     </div>
   `;
 
-  sortedChapters.forEach((group, index) => {
-    const isFirst = index === 0; // Chapter đầu tiên mặc định mở
-    const noteCount = group.notes.length;
-
-    const notesHTML = group.notes.map(note => {
-      return `
-        <div class="note-list-item" data-chapter-id="${note.chapterId}" data-note-index="${note.noteIndex}" data-note-type="chapter">
-          <span class="note-badge">CHAPTER ${note.chapterNumber}</span>
-          <strong>${escapeHTML(note.selectedText)}</strong>
-          <p>${escapeHTML(note.content)}</p>
-          <button class="delete-note-btn" data-action="delete-note">✕</button>
-        </div>
-      `;
-    }).join('');
-
+  allNotes.forEach(note => {
     html += `
-      <div class="accordion-item ${isFirst ? 'active' : ''}" data-chapter="${group.chapterId}">
-        <div class="accordion-header" onclick="toggleAccordion(this)">
-          <div class="accordion-title">
-            <span class="chap-badge">Chap ${group.chapterNumber}</span>
-            <span class="note-count">(${noteCount} note${noteCount > 1 ? 's' : ''})</span>
-          </div>
-          <span class="accordion-icon">${isFirst ? '▲' : '▼'}</span>
-        </div>
-        <div class="accordion-content" style="display: ${isFirst ? 'block' : 'none'};">
-          ${notesHTML}
-        </div>
+      <div class="note-list-item" data-chapter-id="${note.chapterId}" data-note-index="${note.noteIndex}" data-note-type="chapter">
+        <span class="note-badge">CHAPTER ${note.chapterNumber}</span>
+        <strong>${escapeHTML(note.selectedText)}</strong>
+        <p>${escapeHTML(note.content)}</p>
+        <button class="delete-note-btn" data-action="delete-note">✕</button>
       </div>
     `;
   });
@@ -1583,14 +1552,13 @@ function renderChapterNotes() {
   if (sortBtn) {
     sortBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      // Đảo thứ tự
       chapterSortOrder = chapterSortOrder === 'asc' ? 'desc' : 'asc';
       localStorage.setItem('chapter_sort_order', chapterSortOrder);
-      renderChapterNotes(); // render lại
+      renderChapterNotes();
     });
   }
 
-  // Gắn lại sự kiện click cho các nút xóa
+  // Gắn sự kiện click cho các nút xóa
   list.querySelectorAll('.delete-note-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -1598,7 +1566,7 @@ function renderChapterNotes() {
     });
   });
 
-  // Gắn lại sự kiện click cho các note item (mở chapter)
+  // Gắn sự kiện click cho các note item (mở chapter)
   list.querySelectorAll('.note-list-item').forEach(item => {
     item.addEventListener('click', function(e) {
       if (e.target.closest('.delete-note-btn')) return;
@@ -1608,25 +1576,6 @@ function renderChapterNotes() {
       }
     });
   });
-}
-
-// ================= TOGGLE ACCORDION =================
-function toggleAccordion(headerElement) {
-  const accordionItem = headerElement.parentElement;
-  const content = accordionItem.querySelector('.accordion-content');
-  const icon = headerElement.querySelector('.accordion-icon');
-
-  const isOpen = content.style.display === 'block';
-
-  if (isOpen) {
-    content.style.display = 'none';
-    icon.textContent = '▼';
-    accordionItem.classList.remove('active');
-  } else {
-    content.style.display = 'block';
-    icon.textContent = '▲';
-    accordionItem.classList.add('active');
-  }
 }
 
 // ================= REMOVE ANNOTATION =================
@@ -1841,7 +1790,13 @@ function searchNotes(query) {
   });
   story.chapters.forEach(chapter => {
     chapter.notes.forEach(note => {
-      const searchable = [note.selectedText, note.content].join(" ").toLowerCase();
+      // Thêm chapter number và chapter title vào chuỗi tìm kiếm
+      const searchable = [
+        note.selectedText,
+        note.content,
+        `Chapter ${chapter.number}`,
+        chapter.title || ''
+      ].join(" ").toLowerCase();
       if (searchable.includes(query)) {
         results.push({
           source: `Chapter ${chapter.number} · Chapter Note`,
