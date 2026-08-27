@@ -156,6 +156,8 @@ function clearNavigationState() {
 
 // ================= INITIALIZE =================
 async function initApp() {
+  startProgress(); // Bắt đầu progress bar
+
   await loadFromSupabase();
 
   if (!state.stories.length) {
@@ -173,11 +175,13 @@ async function initApp() {
       setTimeout(() => {
         window.scrollTo(0, savedNav.scrollPos || 0);
       }, 100);
+      completeLoading();
       return;
     } else if (savedNav.view === 'storyView' && savedNav.storyId && storyExists) {
       currentStoryId = savedNav.storyId;
       renderStory();
       showView('storyView');
+      completeLoading();
       return;
     }
   }
@@ -185,6 +189,7 @@ async function initApp() {
   renderLibrary();
   showView('libraryView');
   clearNavigationState();
+  completeLoading();
 }
 
 // ================= UTILITIES =================
@@ -342,6 +347,8 @@ async function loadFromSupabase() {
 
 // ================= LOADING SCREEN =================
 let progress = 0;
+let progressInterval = null;
+
 const progressBar = document.getElementById('progress-bar');
 const progressText = document.getElementById('progress-text');
 const loadingScreen = document.getElementById('loading-screen');
@@ -353,17 +360,49 @@ if (player && animationData) {
   player.load(animationData);
 }
 
-function startProgress() {
-  const interval = setInterval(() => {
-    progress += 2;
-    if (progressBar) progressBar.style.width = progress + '%';
-    if (progressText) progressText.innerText = progress + '%';
+function updateProgress(value) {
+  const clamped = Math.min(value, 100);
+  if (progressBar) progressBar.style.width = clamped + '%';
+  if (progressText) progressText.innerText = Math.floor(clamped) + '%';
+}
 
-    if (progress >= 100) {
-      clearInterval(interval);
-      finishLoading();
+function startProgress() {
+  progress = 0;
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = null;
+  }
+  updateProgress(0);
+
+  progressInterval = setInterval(() => {
+    if (progress < 98) {
+      // tăng đều 2% mỗi lần như ban đầu
+      progress += 2;
+      if (progress > 98) progress = 98; // không vượt quá 98
+      updateProgress(progress);
+    } else {
+      // dừng ở 98, không tự động lên 100
+      clearInterval(progressInterval);
+      progressInterval = null;
     }
   }, 50);
+}
+
+// Hàm hoàn tất – gọi khi dữ liệu đã sẵn sàng
+function completeLoading() {
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = null;
+  }
+  // Nếu chưa lên 100, cho lên 100 ngay
+  if (progress < 100) {
+    progress = 100;
+    updateProgress(progress);
+  }
+  // Đợi một chút để người dùng thấy 100% rồi mới ẩn
+  setTimeout(() => {
+    finishLoading();
+  }, 200);
 }
 
 function finishLoading() {
@@ -1952,5 +1991,5 @@ document.addEventListener("keydown", event => {
   }
 })();
 
-// Bắt đầu progress bar ngay khi trang load
-startProgress();
+// ================= KHÔNG GỌI startProgress() Ở ĐÂY =================
+// Đã được gọi bên trong initApp()
