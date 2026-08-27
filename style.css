@@ -330,3 +330,70 @@ textarea { resize: vertical; }
   background: var(--purple-soft);
   border-color: var(--purple);
 }
+
+/* ===== LOADING SCREEN MỚI ===== */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #faf8ff;
+  z-index: 9999;
+}
+
+#loading-screen lottie-player {
+  width: 240px;
+  height: 240px;
+}
+
+.progress-container {
+  width: 280px;
+  height: 10px;
+  background: rgba(118, 84, 216, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+#progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #c4b5fd, #8b5cf6);
+  border-radius: 10px;
+  transition: width 0.1s ease;
+}
+
+#progress-text {
+  margin-top: 4px;
+  color: #7654d8;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Animation ẩn màn hình loading */
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+/* Animation bung màn hình chính ("Bùm") */
+#main-content {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#main-content.hidden {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+/* ===== FIX NỀN TRẮNG CỦA LOTTIE ===== */
+lottie-player,
+dotlottie-player {
+  mix-blend-mode: multiply;
+}
