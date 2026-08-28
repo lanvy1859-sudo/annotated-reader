@@ -385,9 +385,9 @@ function startProgress() {
   updateProgress(0);
 
   progressInterval = setInterval(() => {
-    if (progress < 98) {
+    if (progress < 99) {
       progress += 2;
-      if (progress > 98) progress = 98;
+      if (progress > 99) progress = 99;
       updateProgress(progress);
     } else {
       clearInterval(progressInterval);
