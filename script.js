@@ -742,13 +742,18 @@ function openChapter(chapterId, noteId, keyword) {
   closeEditor();
   saveNavigationState();
   
-  const highlightTarget = (target) => {
+  const highlightTarget = (target, type = 'chapter') => {
     if (!target) return;
     smoothScrollTo(target, 400);
-    target.style.backgroundColor = '#f0ebff';
-    target.style.transition = 'background-color 1s';
+    // Xóa class cũ
+    target.classList.remove('highlight-chapter', 'highlight-global');
+    if (type === 'global') {
+      target.classList.add('highlight-global');
+    } else {
+      target.classList.add('highlight-chapter');
+    }
     setTimeout(() => {
-      target.style.backgroundColor = 'transparent';
+      target.classList.remove('highlight-chapter', 'highlight-global');
     }, 2000);
   };
 
@@ -756,13 +761,13 @@ function openChapter(chapterId, noteId, keyword) {
     setTimeout(() => {
       const target = document.querySelector(`#readerContent [data-note-id="${noteId}"]`);
       if (target) {
-        highlightTarget(target);
+        highlightTarget(target, 'chapter');
       } else {
         window.scrollTo(0, 0);
       }
     }, 300);
   } else if (keyword) {
-    // Tìm kiếm và highlight từ khóa trong reader content (bao gồm cả trong annotation)
+    // Tìm kiếm và highlight từ khóa (global note)
     setTimeout(() => {
       const reader = document.getElementById('readerContent');
       if (!reader) {
@@ -770,13 +775,11 @@ function openChapter(chapterId, noteId, keyword) {
         return;
       }
       
-      // Lấy tất cả text nodes trong reader, không bỏ qua annotation
       const walker = document.createTreeWalker(
         reader,
         NodeFilter.SHOW_TEXT,
         {
           acceptNode: function(node) {
-            // Chỉ chấp nhận text node có chứa keyword (không phân biệt hoa thường)
             return node.textContent.toLowerCase().includes(keyword.toLowerCase()) 
               ? NodeFilter.FILTER_ACCEPT 
               : NodeFilter.FILTER_REJECT;
@@ -792,7 +795,6 @@ function openChapter(chapterId, noteId, keyword) {
       }
       
       if (nodes.length > 0) {
-        // Chọn node đầu tiên
         const firstNode = nodes[0];
         const text = firstNode.textContent;
         const index = text.toLowerCase().indexOf(keyword.toLowerCase());
@@ -801,7 +803,6 @@ function openChapter(chapterId, noteId, keyword) {
           range.setStart(firstNode, index);
           range.setEnd(firstNode, index + keyword.length);
           
-          // Cuộn đến vị trí của range
           const rect = range.getBoundingClientRect();
           const dummy = document.createElement('span');
           dummy.style.position = 'absolute';
@@ -815,17 +816,16 @@ function openChapter(chapterId, noteId, keyword) {
             document.body.removeChild(dummy);
           }, 500);
           
-          // Highlight từ khóa
           try {
             const highlightSpan = document.createElement('span');
-            highlightSpan.style.backgroundColor = '#f0ebff';
-            highlightSpan.style.transition = 'background-color 1s';
             range.surroundContents(highlightSpan);
+            // Thêm class highlight-global
+            highlightSpan.classList.add('highlight-global');
             setTimeout(() => {
-              highlightSpan.style.backgroundColor = 'transparent';
+              highlightSpan.classList.remove('highlight-global');
             }, 2000);
           } catch (e) {
-            // Nếu không thể surround (do range vượt quá node), thử cách khác: highlight bằng cách bọc text
+            // Fallback nếu không thể surround
             const parent = firstNode.parentNode;
             const textNode = firstNode;
             const beforeText = text.substring(0, index);
@@ -833,21 +833,18 @@ function openChapter(chapterId, noteId, keyword) {
             const afterText = text.substring(index + keyword.length);
             
             const span = document.createElement('span');
-            span.style.backgroundColor = '#f0ebff';
-            span.style.transition = 'background-color 1s';
+            span.classList.add('highlight-global');
             span.textContent = matchText;
             setTimeout(() => {
-              span.style.backgroundColor = 'transparent';
+              span.classList.remove('highlight-global');
             }, 2000);
             
             const fragment = document.createDocumentFragment();
             if (beforeText) fragment.appendChild(document.createTextNode(beforeText));
             fragment.appendChild(span);
             if (afterText) fragment.appendChild(document.createTextNode(afterText));
-            
             parent.replaceChild(fragment, textNode);
           }
-          
           found = true;
         }
       }
@@ -869,6 +866,26 @@ function renderReader() {
   document.getElementById("readerChapterName").textContent = `Chapter ${chapter.number}: ${chapter.title || "Untitled"}`;
   const reader = document.getElementById("readerContent");
   reader.innerHTML = chapter.content;
+  
+  // Gán class phân biệt cho annotation
+  const annotations = reader.querySelectorAll('.editor-annotation, .annotation');
+  annotations.forEach(el => {
+    const noteId = el.dataset.noteId;
+    // Tìm trong chapter notes
+    let note = chapter.notes.find(n => n.id === noteId);
+    if (note) {
+      el.classList.add('chapter-note');
+      el.dataset.noteType = 'chapter';
+    } else {
+      // Tìm trong global notes
+      const globalNote = story.globalNotes.find(n => n.id === noteId);
+      if (globalNote) {
+        el.classList.add('global-note');
+        el.dataset.noteType = 'global';
+      }
+    }
+  });
+  
   activateReaderAnnotations();
 }
 
@@ -1573,8 +1590,10 @@ function applyAnnotationToSelection(noteId) {
   if (!selectedRange) return;
   try {
     const span = document.createElement("span");
-    span.className = "editor-annotation";
+    const noteType = pendingNoteType || 'chapter';
+    span.className = `editor-annotation ${noteType === 'global' ? 'global-note' : 'chapter-note'}`;
     span.dataset.noteId = noteId;
+    span.dataset.noteType = noteType;
     const contents = selectedRange.extractContents();
     span.appendChild(contents);
     selectedRange.insertNode(span);
