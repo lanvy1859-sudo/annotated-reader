@@ -1787,12 +1787,14 @@ async function deleteNoteFromOverview(target) {
       }
     }
 
-  } else if (type === "chapter") {
+   } else if (type === "chapter") {
     const chapterId = item.dataset.chapterId;
-    const noteIndex = parseInt(item.dataset.noteIndex, 10);
-    if (!chapterId || isNaN(noteIndex)) return;
+    const noteId = item.dataset.noteId;            // lấy noteId thay vì noteIndex
+    if (!chapterId || !noteId) return;
     const chapter = story.chapters.find(c => c.id === chapterId);
     if (!chapter) return;
+    const noteIndex = chapter.notes.findIndex(n => n.id === noteId); // tìm index theo id
+    if (noteIndex === -1) return;
     const note = chapter.notes[noteIndex];
     if (!note) return;
     if (!confirm(`Xóa chapter note "${note.selectedText}"?`)) return;
