@@ -735,23 +735,125 @@ async function deleteChapter(chapterId) {
 }
 
 // ================= OPEN CHAPTER =================
-function openChapter(chapterId, noteId) {
+function openChapter(chapterId, noteId, keyword) {
   currentChapterId = chapterId;
   renderReader();
   showView("readerView");
   closeEditor();
   saveNavigationState();
+  
+  const highlightTarget = (target) => {
+    if (!target) return;
+    smoothScrollTo(target, 400);
+    target.style.backgroundColor = '#f0ebff';
+    target.style.transition = 'background-color 1s';
+    setTimeout(() => {
+      target.style.backgroundColor = 'transparent';
+    }, 2000);
+  };
+
   if (noteId) {
     setTimeout(() => {
       const target = document.querySelector(`#readerContent [data-note-id="${noteId}"]`);
       if (target) {
-        smoothScrollTo(target, 400); // 400ms – bạn có thể chỉnh 300, 350 tùy thích
-        target.style.backgroundColor = '#f0ebff';
-        target.style.transition = 'background-color 1s';
-        setTimeout(() => {
-          target.style.backgroundColor = 'transparent';
-        }, 2000);
+        highlightTarget(target);
       } else {
+        window.scrollTo(0, 0);
+      }
+    }, 300);
+  } else if (keyword) {
+    // Tìm kiếm và highlight từ khóa trong reader content (bao gồm cả trong annotation)
+    setTimeout(() => {
+      const reader = document.getElementById('readerContent');
+      if (!reader) {
+        window.scrollTo(0, 0);
+        return;
+      }
+      
+      // Lấy tất cả text nodes trong reader, không bỏ qua annotation
+      const walker = document.createTreeWalker(
+        reader,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: function(node) {
+            // Chỉ chấp nhận text node có chứa keyword (không phân biệt hoa thường)
+            return node.textContent.toLowerCase().includes(keyword.toLowerCase()) 
+              ? NodeFilter.FILTER_ACCEPT 
+              : NodeFilter.FILTER_REJECT;
+          }
+        }
+      );
+      
+      let found = false;
+      let nodes = [];
+      let node;
+      while (node = walker.nextNode()) {
+        nodes.push(node);
+      }
+      
+      if (nodes.length > 0) {
+        // Chọn node đầu tiên
+        const firstNode = nodes[0];
+        const text = firstNode.textContent;
+        const index = text.toLowerCase().indexOf(keyword.toLowerCase());
+        if (index !== -1) {
+          const range = document.createRange();
+          range.setStart(firstNode, index);
+          range.setEnd(firstNode, index + keyword.length);
+          
+          // Cuộn đến vị trí của range
+          const rect = range.getBoundingClientRect();
+          const dummy = document.createElement('span');
+          dummy.style.position = 'absolute';
+          dummy.style.top = (rect.top + window.pageYOffset - 50) + 'px';
+          dummy.style.left = '0';
+          dummy.style.width = '1px';
+          dummy.style.height = '1px';
+          document.body.appendChild(dummy);
+          smoothScrollTo(dummy, 400);
+          setTimeout(() => {
+            document.body.removeChild(dummy);
+          }, 500);
+          
+          // Highlight từ khóa
+          try {
+            const highlightSpan = document.createElement('span');
+            highlightSpan.style.backgroundColor = '#f0ebff';
+            highlightSpan.style.transition = 'background-color 1s';
+            range.surroundContents(highlightSpan);
+            setTimeout(() => {
+              highlightSpan.style.backgroundColor = 'transparent';
+            }, 2000);
+          } catch (e) {
+            // Nếu không thể surround (do range vượt quá node), thử cách khác: highlight bằng cách bọc text
+            const parent = firstNode.parentNode;
+            const textNode = firstNode;
+            const beforeText = text.substring(0, index);
+            const matchText = text.substring(index, index + keyword.length);
+            const afterText = text.substring(index + keyword.length);
+            
+            const span = document.createElement('span');
+            span.style.backgroundColor = '#f0ebff';
+            span.style.transition = 'background-color 1s';
+            span.textContent = matchText;
+            setTimeout(() => {
+              span.style.backgroundColor = 'transparent';
+            }, 2000);
+            
+            const fragment = document.createDocumentFragment();
+            if (beforeText) fragment.appendChild(document.createTextNode(beforeText));
+            fragment.appendChild(span);
+            if (afterText) fragment.appendChild(document.createTextNode(afterText));
+            
+            parent.replaceChild(fragment, textNode);
+          }
+          
+          found = true;
+        }
+      }
+      
+      if (!found) {
+        toast(`Không tìm thấy từ "${keyword}" trong chapter này.`);
         window.scrollTo(0, 0);
       }
     }, 300);
@@ -1614,6 +1716,15 @@ function renderGlobalNotes() {
     `;
     item.addEventListener("click", (e) => {
       if (e.target.closest(".delete-note-btn")) return;
+      // Nếu global note có chapterId, mở chapter đó và highlight từ
+      if (note.chapterId) {
+        const chapter = story.chapters.find(c => c.id === note.chapterId);
+        if (chapter) {
+          openChapter(chapter.id, null, note.selectedText); // truyền từ khóa để highlight
+          return;
+        }
+      }
+      // Nếu không có chapterId, hiện popup như cũ
       showNotePopup(note, item);
     });
     list.appendChild(item);
