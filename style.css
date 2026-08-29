@@ -451,3 +451,24 @@ dotlottie-player {
   border-color: var(--purple);
   color: var(--purple-dark);
 }
+
+/* ===== PHÂN BIỆT MÀU GẠCH DƯỚI ===== */
+.editor-annotation.chapter-note {
+  text-decoration-color: var(--purple) !important;
+}
+
+.editor-annotation.global-note {
+  text-decoration: underline wavy var(--purple) 1.5px;
+  text-underline-offset: 0.8px;
+}
+
+/* ===== MÀU HIGHLIGHT KHI CLICK ===== */
+.highlight-chapter {
+  background-color: #f0ebff !important;  /* tím nhạt */
+  transition: background-color 1s;
+}
+
+.highlight-global {
+  background-color: #f0ebff !important;  /* tím nhạt */
+  transition: background-color 1s;
+}
