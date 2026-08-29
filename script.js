@@ -31,7 +31,7 @@ let selectedRange = null;
 let selectedText = "";
 let pendingNoteType = "chapter";
 let pendingImages = [];
-
+let searchMode = 'content'; // 'content' hoặc 'chapter'
 // ================= DEFAULT DATA =================
 function createDemoStory() {
   const chapter1Id = uid();
@@ -1776,52 +1776,85 @@ function searchNotes(query) {
   const story = getStory();
   const container = document.getElementById("searchResults");
   container.innerHTML = "";
-  query = query.trim().toLowerCase();
+  query = query.trim();
   if (!query) return;
+
   const results = [];
-  story.globalNotes.forEach(note => {
-    const searchable = [note.title, note.content, ...(note.keywords || [])].join(" ").toLowerCase();
-    if (searchable.includes(query)) {
-      results.push({
-        source: "Global Note",
-        title: note.title,
-        content: note.content,
-        action: () => showNotePopup(note, document.getElementById("noteSearch"))
-      });
+
+  if (searchMode === 'chapter') {
+    //  Chế độ tìm theo số chương
+    const chapterNumber = parseInt(query, 10);
+    if (isNaN(chapterNumber) || chapterNumber <= 0) {
+      container.innerHTML = `<p class="muted">Vui lòng nhập số chương hợp lệ (1, 2, 3...).</p>`;
+      return;
     }
-  });
-  story.chapters.forEach(chapter => {
-    chapter.notes.forEach(note => {
-      // Thêm chapter number và chapter title vào chuỗi tìm kiếm
-      const searchable = [
-        note.selectedText,
-        note.content,
-        `Chapter ${chapter.number}`,
-        chapter.title || ''
-      ].join(" ").toLowerCase();
-      if (searchable.includes(query)) {
+    const targetChapter = story.chapters.find(c => c.number === chapterNumber);
+    if (!targetChapter) {
+      container.innerHTML = `<p class="muted">Không tìm thấy chương số ${chapterNumber}.</p>`;
+      return;
+    }
+    // Hiển thị tiêu đề chương
+
+    if (targetChapter.notes.length === 0) {
+      container.innerHTML += `<p class="muted">Chương này chưa có note nào.</p>`;
+      return;
+    }
+
+    targetChapter.notes.forEach(note => {
+      results.push({
+        source: `Chapter ${targetChapter.number} · Chapter Note`,
+        title: note.selectedText,
+        content: note.content,
+        action: () => openChapter(targetChapter.id)
+      });
+    });
+  } else {
+    // 📄 Chế độ tìm theo nội dung (mặc định)
+    // Tìm trong global notes
+    story.globalNotes.forEach(note => {
+      const searchable = [note.title, note.content, ...(note.keywords || [])].join(" ").toLowerCase();
+      if (searchable.includes(query.toLowerCase())) {
         results.push({
-          source: `Chapter ${chapter.number} · Chapter Note`,
-          title: note.selectedText,
+          source: "Global Note",
+          title: note.title,
           content: note.content,
-          action: () => openChapter(chapter.id)
+          action: () => showNotePopup(note, document.getElementById("noteSearch"))
         });
       }
     });
-  });
+    // Tìm trong chapter notes
+    story.chapters.forEach(chapter => {
+      chapter.notes.forEach(note => {
+        const searchable = [note.selectedText, note.content].join(" ").toLowerCase();
+        if (searchable.includes(query.toLowerCase())) {
+          results.push({
+            source: `Chapter ${chapter.number} · Chapter Note`,
+            title: note.selectedText,
+            content: note.content,
+            action: () => openChapter(chapter.id)
+          });
+        }
+      });
+    });
+  }
+
   if (!results.length) {
-    container.innerHTML = `<p class="muted">No results found.</p>`;
+    container.innerHTML = `<p class="muted">Không tìm thấy kết quả.</p>`;
     return;
   }
+
   results.forEach(result => {
     const item = document.createElement("div");
     item.className = "search-result";
-    item.innerHTML = `<div class="source">${escapeHTML(result.source)}</div><strong>${escapeHTML(result.title)}</strong><p>${escapeHTML(result.content)}</p>`;
+    item.innerHTML = `
+      <div class="source">${escapeHTML(result.source)}</div>
+      <strong>${escapeHTML(result.title)}</strong>
+      <p>${escapeHTML(result.content)}</p>
+    `;
     item.addEventListener("click", result.action);
     container.appendChild(item);
   });
 }
-
 // ================= ADD GLOBAL NOTE =================
 document.getElementById("addGlobalNoteBtn").addEventListener("click", async () => {
   const story = getStory();
@@ -1939,6 +1972,7 @@ document.addEventListener("keydown", event => {
   }
 });
 
+
 // ================= BOOT =================
 (async function boot() {
   try {
@@ -1948,5 +1982,26 @@ document.addEventListener("keydown", event => {
   }
 })();
 
+// ===== SEARCH MODE TOGGLE =====
+document.getElementById('searchModeBtn').addEventListener('click', function() {
+  if (searchMode === 'content') {
+    searchMode = 'chapter';
+    this.textContent = 'Content';
+    this.classList.add('active');
+    document.getElementById('noteSearch').placeholder = 'Enter chapter number (e.g. 12)';
+  } else {
+    searchMode = 'content';
+    this.textContent = 'Chapter';
+    this.classList.remove('active');
+    document.getElementById('noteSearch').placeholder = 'Search notes, terms, characters...';
+  }
+  const query = document.getElementById('noteSearch').value;
+  if (query.trim()) searchNotes(query);
+});
+
+function highlightText(text, query) {
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(regex, '<mark>$1</mark>');
+}
 // ================= KHÔNG GỌI startProgress() Ở ĐÂY =================
 // Đã được gọi bên trong initApp()
