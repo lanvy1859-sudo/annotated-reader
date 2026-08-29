@@ -73,7 +73,8 @@ function createDemoStory() {
             content: "A character mentioned in the old document. This is a demo Chapter Note.",
             images: [],
             caption: "",
-            source: ""
+            source: "",
+            createdAt: new Date().toISOString()
           }
         ]
       },
@@ -103,7 +104,8 @@ function createDemoStory() {
             content: "The same name appears again in this chapter.",
             images: [],
             caption: "",
-            source: ""
+            source: "",
+            createdAt: new Date().toISOString()
           }
         ]
       }
@@ -119,7 +121,8 @@ function createDemoStory() {
         images: [],
         caption: "",
         source: "",
-        chapterId: null
+        chapterId: null,
+        createdAt: new Date().toISOString()
       }
     ]
   };
@@ -315,7 +318,8 @@ async function loadFromSupabase() {
           content: n.note_text || '',
           images: n.source ? [n.source] : [],
           caption: n.caption || '',
-          source: n.source || ''
+          source: n.source || '',
+          createdAt: n.created_at || new Date().toISOString()
         })) : []
       }));
 
@@ -330,7 +334,8 @@ async function loadFromSupabase() {
         caption: n.caption || '',
         source: n.source || '',
         keywords: [n.selected_text || ''],
-        chapterId: n.chapter_id || null
+        chapterId: n.chapter_id || null,
+        createdAt: n.created_at || new Date().toISOString()
       }));
 
       return {
@@ -730,14 +735,29 @@ async function deleteChapter(chapterId) {
 }
 
 // ================= OPEN CHAPTER =================
-function openChapter(chapterId) {
+function openChapter(chapterId, noteId) {
   currentChapterId = chapterId;
   renderReader();
   showView("readerView");
   closeEditor();
   saveNavigationState();
-  // ===== THÊM DÒNG NÀY =====
-  window.scrollTo(0, 0);
+  if (noteId) {
+    setTimeout(() => {
+      const target = document.querySelector(`#readerContent [data-note-id="${noteId}"]`);
+      if (target) {
+        smoothScrollTo(target, 400); // 400ms – bạn có thể chỉnh 300, 350 tùy thích
+        target.style.backgroundColor = '#f0ebff';
+        target.style.transition = 'background-color 1s';
+        setTimeout(() => {
+          target.style.backgroundColor = 'transparent';
+        }, 2000);
+      } else {
+        window.scrollTo(0, 0);
+      }
+    }, 300);
+  } else {
+    window.scrollTo(0, 0);
+  }
 }
 function renderReader() {
   const story = getStory();
@@ -873,16 +893,13 @@ function editNote(noteId, type) {
     return;
   }
   let note = null;
-  let container = null;
   if (type === 'global') {
     note = story.globalNotes.find(n => n.id === noteId);
-    container = story.globalNotes;
   } else {
     for (let ch of story.chapters) {
       const found = ch.notes.find(n => n.id === noteId);
       if (found) {
         note = found;
-        container = ch.notes;
         break;
       }
     }
@@ -891,24 +908,135 @@ function editNote(noteId, type) {
     toast("Note not found!");
     return;
   }
+
   const isGlobal = note.type === "global";
   const noteLabel = isGlobal ? "Global Note" : "Chapter Note";
+
+  // HTML giống hệt openNoteEditor, có hiển thị ảnh hiện tại
   const html = `
     <div style="padding:18px; font-family: Inter, sans-serif; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); max-width: 380px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:10px;">
         <strong style="font-size:16px; color: #7654d8;">Edit ${noteLabel}</strong>
         <button onclick="closeNotePopup()" style="border:0; background:transparent; font-size:22px; color:#999; cursor:pointer;">×</button>
       </div>
-      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Content</label>
+      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Note</label>
       <textarea id="editNoteContent" style="width:100%; min-height:100px; border:1px solid #ddd; border-radius:8px; padding:10px; font-family:inherit; font-size:14px; outline:none;">${escapeHTML(note.content)}</textarea>
-      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Caption (optional)</label>
-      <input id="editNoteCaption" class="field" value="${escapeHTML(note.caption || '')}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px;">
-      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Source (optional)</label>
-      <input id="editNoteSource" class="field" value="${escapeHTML(note.source || '')}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:12px;">
-      <button class="btn primary full" id="saveEditNoteBtn" style="margin-top:8px; width:100%; padding:12px; background:#7654d8; color:white; border:0; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">Save Changes</button>
+      
+      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Illustration</label>
+      <div style="display:flex; gap:12px; align-items:stretch;">
+        <div id="editImageSlots" class="image-slots" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; align-content:center; flex:0 0 auto;">
+          ${note.images && note.images.length > 0 ? note.images.map(img => `
+            <div class="image-slot" style="position:relative; width:76px; height:76px; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
+              <img src="${img}" style="width:100%; height:100%; object-fit:cover;">
+              <button class="image-remove" data-image="${img}" style="position:absolute; top:2px; right:2px; width:20px; height:20px; border:0; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:14px; cursor:pointer;">×</button>
+            </div>
+          `).join('') : ''}
+          <button class="add-image-btn" id="editAddImageBtn" title="Add image" style="width:76px; height:76px; border:1px solid #ddd; background:white; border-radius:8px; font-size:24px; color:#7654d8; cursor:pointer;">＋</button>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between; gap:8px; min-width:0;">
+          <input id="editCaption" class="field" placeholder="Caption (optional)" value="${escapeHTML(note.caption || '')}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px;">
+          <input id="editSource" class="field" placeholder="Source (optional)" value="${escapeHTML(note.source || '')}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px;">
+        </div>
+      </div>
+      
+      <button class="btn primary full" id="saveEditNoteBtn" style="width:100%; padding:12px; background:#7654d8; color:white; border:0; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; margin-top:12px;">Save Changes</button>
     </div>
   `;
-  openPopup(html, null);
+
+  const popup = document.getElementById('notePopup');
+  if (popup._outsideHandler) {
+    document.removeEventListener('click', popup._outsideHandler);
+    delete popup._outsideHandler;
+  }
+  popup.innerHTML = html;
+  popup.style.position = 'fixed';
+  popup.style.zIndex = '1000';
+  popup.style.display = 'block';
+  popup.style.visibility = 'visible';
+  popup.style.left = '50%';
+  popup.style.top = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
+  popup.classList.add('open');
+
+  // Hàm render lại danh sách ảnh
+  function renderEditImages(note) {
+    const container = document.getElementById('editImageSlots');
+    container.innerHTML = '';
+    if (note.images && note.images.length > 0) {
+      note.images.forEach(img => {
+        const slot = document.createElement('div');
+        slot.className = 'image-slot';
+        slot.style.cssText = 'position:relative; width:76px; height:76px; border:1px solid #ddd; border-radius:8px; overflow:hidden;';
+        slot.innerHTML = `
+          <img src="${img}" style="width:100%; height:100%; object-fit:cover;">
+          <button class="image-remove" data-image="${img}" style="position:absolute; top:2px; right:2px; width:20px; height:20px; border:0; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:14px; cursor:pointer;">×</button>
+        `;
+        container.appendChild(slot);
+      });
+    }
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-image-btn';
+    addBtn.id = 'editAddImageBtn';
+    addBtn.textContent = '＋';
+    addBtn.title = 'Add another image';
+    addBtn.style.cssText = 'width:76px; height:76px; border:1px solid #ddd; background:white; border-radius:8px; font-size:24px; color:#7654d8; cursor:pointer;';
+    container.appendChild(addBtn);
+    addBtn.addEventListener('click', function() {
+      triggerImageUpload(note, renderEditImages);
+    });
+  }
+
+  // Hàm trigger upload ảnh
+  function triggerImageUpload(note, rerender) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    fileInput.addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const filePath = `notes/${Date.now()}_${file.name}`;
+        const { data, error } = await _supabase.storage
+          .from('reader-images')
+          .upload(filePath, file);
+        if (error) throw error;
+        const { data: urlData } = _supabase.storage.from('reader-images').getPublicUrl(filePath);
+        const imageUrl = urlData.publicUrl;
+        if (!note.images) note.images = [];
+        note.images.push(imageUrl);
+        rerender(note);
+        toast('Đã upload ảnh');
+      } catch (err) {
+        console.error(err);
+        toast('Lỗi upload ảnh: ' + err.message);
+      }
+      document.body.removeChild(fileInput);
+    });
+  }
+
+  // Xử lý sự kiện thêm ảnh ban đầu
+  document.getElementById('editAddImageBtn').addEventListener('click', function() {
+    triggerImageUpload(note, renderEditImages);
+  });
+
+  // Xóa ảnh
+  document.getElementById('editImageSlots').addEventListener('click', function(e) {
+    const removeBtn = e.target.closest('.image-remove');
+    if (!removeBtn) return;
+    const imgUrl = removeBtn.dataset.image;
+    if (!imgUrl) return;
+    if (!note.images) note.images = [];
+    const index = note.images.indexOf(imgUrl);
+    if (index !== -1) {
+      note.images.splice(index, 1);
+      renderEditImages(note);
+    }
+  });
+
+  // Lưu thay đổi
   document.getElementById('saveEditNoteBtn').addEventListener('click', async function() {
     const newContent = document.getElementById('editNoteContent').value.trim();
     if (!newContent) {
@@ -916,8 +1044,8 @@ function editNote(noteId, type) {
       return;
     }
     note.content = newContent;
-    note.caption = document.getElementById('editNoteCaption').value.trim();
-    note.source = document.getElementById('editNoteSource').value.trim();
+    note.caption = document.getElementById('editCaption').value.trim();
+    note.source = document.getElementById('editSource').value.trim();
 
     try {
       await _supabase
@@ -1300,7 +1428,8 @@ async function saveNewNote() {
       images: pendingImages,
       caption: caption,
       source: imageUrl || source,
-      chapterId: chapterId
+      chapterId: chapterId,
+      createdAt: new Date().toISOString()
     };
 
     if (noteType === 'chapter') {
@@ -1492,14 +1621,13 @@ function renderGlobalNotes() {
 }
 
 // ================= RENDER CHAPTER NOTES (DANH SÁCH PHẲNG) =================
-let chapterSortOrder = localStorage.getItem('chapter_sort_order') || 'desc';
+///
 
 function renderChapterNotes() {
   const story = getStory();
   const list = document.getElementById("chapterNotesList");
   if (!list) return;
 
-  // Lấy tất cả chapter notes từ tất cả chapters
   let allNotes = [];
   story.chapters.forEach(chapter => {
     chapter.notes.forEach((note, idx) => {
@@ -1507,7 +1635,8 @@ function renderChapterNotes() {
         ...note,
         chapterNumber: chapter.number,
         chapterId: chapter.id,
-        noteIndex: idx
+        noteIndex: idx,
+        createdAt: note.createdAt || new Date(0).toISOString()
       });
     });
   });
@@ -1517,28 +1646,13 @@ function renderChapterNotes() {
     return;
   }
 
-  // Sắp xếp theo chapter number
-  allNotes.sort((a, b) => {
-    if (chapterSortOrder === 'asc') {
-      return a.chapterNumber - b.chapterNumber;
-    } else {
-      return b.chapterNumber - a.chapterNumber;
-    }
-  });
+  // Sắp xếp theo thời gian tạo: mới nhất lên đầu
+  allNotes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   let html = '';
-  // Thêm nút sắp xếp
-  html += `
-    <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-      <button id="sortChapterBtn" class="btn ghost" style="font-size:12px; padding:4px 10px;">
-        ${chapterSortOrder === 'asc' ? '▼ Oldest first' : '▲ Newest first'}
-      </button>
-    </div>
-  `;
-
   allNotes.forEach(note => {
     html += `
-      <div class="note-list-item" data-chapter-id="${note.chapterId}" data-note-index="${note.noteIndex}" data-note-type="chapter">
+      <div class="note-list-item" data-chapter-id="${note.chapterId}" data-note-id="${note.id}" data-note-type="chapter">
         <span class="note-badge">CHAPTER ${note.chapterNumber}</span>
         <strong>${escapeHTML(note.selectedText)}</strong>
         <p>${escapeHTML(note.content)}</p>
@@ -1549,18 +1663,7 @@ function renderChapterNotes() {
 
   list.innerHTML = html;
 
-  // Gắn sự kiện cho nút sắp xếp
-  const sortBtn = document.getElementById('sortChapterBtn');
-  if (sortBtn) {
-    sortBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      chapterSortOrder = chapterSortOrder === 'asc' ? 'desc' : 'asc';
-      localStorage.setItem('chapter_sort_order', chapterSortOrder);
-      renderChapterNotes();
-    });
-  }
-
-  // Gắn sự kiện click cho các nút xóa
+  // Sự kiện xóa
   list.querySelectorAll('.delete-note-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -1568,13 +1671,14 @@ function renderChapterNotes() {
     });
   });
 
-  // Gắn sự kiện click cho các note item (mở chapter)
+  // Sự kiện click mở chapter (truyền noteId)
   list.querySelectorAll('.note-list-item').forEach(item => {
     item.addEventListener('click', function(e) {
       if (e.target.closest('.delete-note-btn')) return;
       const chapterId = this.dataset.chapterId;
+      const noteId = this.dataset.noteId;
       if (chapterId) {
-        openChapter(chapterId);
+        openChapter(chapterId, noteId);
       }
     });
   });
@@ -1805,7 +1909,7 @@ function searchNotes(query) {
         source: `Chapter ${targetChapter.number} · Chapter Note`,
         title: note.selectedText,
         content: note.content,
-        action: () => openChapter(targetChapter.id)
+        action: () => openChapter(targetChapter.id, note.id)
       });
     });
   } else {
@@ -1831,7 +1935,7 @@ function searchNotes(query) {
             source: `Chapter ${chapter.number} · Chapter Note`,
             title: note.selectedText,
             content: note.content,
-            action: () => openChapter(chapter.id)
+            action: () => openChapter(chapter.id, note.id)
           });
         }
       });
@@ -1873,7 +1977,8 @@ document.getElementById("addGlobalNoteBtn").addEventListener("click", async () =
     images: [],
     caption: "",
     source: "",
-    chapterId: null
+    chapterId: null,
+    createdAt: new Date().toISOString()
   };
   story.globalNotes.push(note);
 
@@ -1971,6 +2076,27 @@ document.addEventListener("keydown", event => {
     closeChapterDrawer();
   }
 });
+
+
+function smoothScrollTo(element, duration = 350) {
+  const targetPosition = element.getBoundingClientRect().top + window.pageYOffset - window.innerHeight / 2 + element.offsetHeight / 2;
+  const startPosition = window.pageYOffset;
+  const distance = targetPosition - startPosition;
+  let startTime = null;
+
+  function animation(currentTime) {
+    if (startTime === null) startTime = currentTime;
+    const timeElapsed = currentTime - startTime;
+    const progress = Math.min(timeElapsed / duration, 1);
+    // Hàm easing easeOutCubic để chuyển động mượt, bớt giật
+    const ease = 1 - Math.pow(1 - progress, 3);
+    window.scrollTo(0, startPosition + distance * ease);
+    if (timeElapsed < duration) {
+      requestAnimationFrame(animation);
+    }
+  }
+  requestAnimationFrame(animation);
+}
 
 
 // ================= BOOT =================
