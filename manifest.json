@@ -1,6 +1,6 @@
 {
-  "name": "Meworeader",
-  "short_name": "Meworeader",
+  "name": "Memoreader",
+  "short_name": "Memoreader",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121212",
