@@ -472,3 +472,21 @@ dotlottie-player {
   background-color: #f0ebff !important;  /* tím nhạt */
   transition: background-color 1s;
 }
+
+/* ===== READING PROGRESS BAR ===== */
+/* ===== READING PROGRESS BAR ===== */
+#readingProgressBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #c4b5fd, #8b5cf6);
+  width: 0%;
+  z-index: 9999;
+  transition: width 0.1s ease;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 6px rgba(118, 84, 216, 0.3);
+}
+.reading-progress-hidden {
+  display: none;
+}
