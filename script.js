@@ -32,6 +32,8 @@ let selectedText = "";
 let pendingNoteType = "chapter";
 let pendingImages = [];
 let searchMode = 'content'; // 'content' hoặc 'chapter'
+// === THANH TIẾN ĐỘ ĐỌC ===
+const readingProgressBar = document.getElementById('readingProgressBar');
 // ================= DEFAULT DATA =================
 function createDemoStory() {
   const chapter1Id = uid();
@@ -170,22 +172,32 @@ async function initApp() {
   const savedNav = restoreNavigationState();
   if (savedNav) {
     const storyExists = state.stories.some(s => s.id === savedNav.storyId);
+
     if (savedNav.view === 'readerView' && savedNav.chapterId && storyExists) {
       currentStoryId = savedNav.storyId;
       currentChapterId = savedNav.chapterId;
       renderReader();
       showView('readerView');
+
+      // Xử lý thanh tiến độ
+      if (readingProgressBar) {
+        readingProgressBar.classList.remove('reading-progress-hidden');
+        setTimeout(updateReadingProgress, 100);
+      }
+
       setTimeout(() => {
         window.scrollTo(0, savedNav.scrollPos || 0);
       }, 100);
       completeLoading();
       return;
+
     } else if (savedNav.view === 'storyView' && savedNav.storyId && storyExists) {
       currentStoryId = savedNav.storyId;
       renderStory();
       showView('storyView');
       completeLoading();
       return;
+
     } else if (savedNav.view === 'overviewView' && savedNav.storyId && storyExists) {
       currentStoryId = savedNav.storyId;
       const story = getStory();
@@ -198,6 +210,11 @@ async function initApp() {
       }
     }
   }
+
+  // Nếu không khôi phục được trạng thái
+ 
+  // Nếu không khôi phục được trạng thái, về mặc định
+ 
 
   renderLibrary();
   showView('libraryView');
@@ -230,6 +247,19 @@ function showView(id) {
   document.getElementById(id).classList.add("active");
   currentView = id;
   saveNavigationState();
+
+  // === XỬ LÝ THANH TIẾN ĐỘ ĐỌC ===
+  if (id === 'readerView') {
+    if (readingProgressBar) {
+      readingProgressBar.classList.remove('reading-progress-hidden');
+      setTimeout(updateReadingProgress, 50);
+    }
+  } else {
+    if (readingProgressBar) {
+      readingProgressBar.classList.add('reading-progress-hidden');
+      readingProgressBar.style.width = '0%';
+    }
+  }
 }
 function toast(message) {
   const el = document.getElementById("toast");
@@ -241,9 +271,38 @@ function toast(message) {
   }, 1800);
 }
 
+// ===== UPDATE READING PROGRESS =====
+function updateReadingProgress() {
+  if (!readingProgressBar) return;
+  const readerView = document.getElementById('readerView');
+  if (!readerView || !readerView.classList.contains('active')) {
+    readingProgressBar.style.width = '0%';
+    return;
+  }
+
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight;
+  const winHeight = window.innerHeight;
+  const maxScroll = docHeight - winHeight;
+
+  let percent = 0;
+  if (maxScroll > 0) {
+    percent = (scrollTop / maxScroll) * 100;
+  }
+  percent = Math.min(100, Math.max(0, percent));
+  readingProgressBar.style.width = percent + '%';
+}
+
 window.addEventListener('scroll', () => {
   if (currentView === 'readerView') {
     saveNavigationState();
+    updateReadingProgress(); // thêm dòng này
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (currentView === 'readerView') {
+    updateReadingProgress();
   }
 });
 
@@ -1136,13 +1195,8 @@ function editNote(noteId, type) {
     });
   }
 
-  // Xử lý sự kiện thêm ảnh ban đầu
-  document.getElementById('editAddImageBtn').addEventListener('click', function() {
-    triggerImageUpload(note, renderEditImages);
-  });
-
   // Xóa ảnh
-  document.getElementById('editImageSlots').addEventListener('click', function(e) {
+document.getElementById('editImageSlots').addEventListener('click', function(e) {
     const removeBtn = e.target.closest('.image-remove');
     if (!removeBtn) return;
     const imgUrl = removeBtn.dataset.image;
@@ -1156,7 +1210,7 @@ function editNote(noteId, type) {
   });
 
   // Lưu thay đổi
-  document.getElementById('saveEditNoteBtn').addEventListener('click', async function() {
+document.getElementById('saveEditNoteBtn').addEventListener('click', async function() {
     const newContent = document.getElementById('editNoteContent').value.trim();
     if (!newContent) {
       toast("Content cannot be empty");
@@ -1190,7 +1244,9 @@ function editNote(noteId, type) {
     }
   });
 }
-window.editNote = editNote;
+
+// Xuất hàm ra global
+
 
 // ================= POPUP POSITION =================
 function positionPopup(popup, anchor) {
