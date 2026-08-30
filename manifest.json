@@ -1,6 +1,6 @@
 {
-  "name": "Annotated Reader",
-  "short_name": "Annotated Reader",
+  "name": "Memoreader",
+  "short_name": "Memoreader",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121212",
