@@ -490,3 +490,12 @@ dotlottie-player {
 .reading-progress-hidden {
   display: none;
 }
+
+/* Badge cho note có ảnh */
+.note-image-badge {
+  display: inline-block;
+  margin-left: 6px;
+  color: var(--purple);
+  font-size: 14px;
+  vertical-align: middle;
+}
