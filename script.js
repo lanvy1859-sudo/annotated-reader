@@ -1194,7 +1194,7 @@ function editNote(noteId, type) {
       document.body.removeChild(fileInput);
     });
   }
-
+  renderEditImages(note);
   // Xóa ảnh
 document.getElementById('editImageSlots').addEventListener('click', function(e) {
     const removeBtn = e.target.closest('.image-remove');
@@ -1774,23 +1774,31 @@ function renderGlobalNotes() {
   const story = getStory();
   const list = document.getElementById("globalNotesList");
   list.innerHTML = "";
+
   if (!story.globalNotes.length) {
     list.innerHTML = `<p class="muted">No global notes yet.</p>`;
     return;
   }
+
   story.globalNotes.forEach((note, index) => {
     const item = document.createElement("div");
     item.className = "note-list-item";
     item.dataset.noteIndex = index;
     item.dataset.noteType = "global";
+
+    const hasImage = note.images && note.images.length > 0;
+    const imageBadge = hasImage ? `<span class="note-image-badge">✦</span>` : '';
+
     item.innerHTML = `
       <span class="note-badge">GLOBAL · ${escapeHTML(note.category || "NOTE")}</span>
-      <strong>${escapeHTML(note.title || note.selectedText)}</strong>
+      <strong>${escapeHTML(note.title || note.selectedText)} ${imageBadge}</strong>
       <p>${escapeHTML(note.content)}</p>
       <button class="delete-note-btn" data-action="delete-note">✕</button>
     `;
+
     item.addEventListener("click", (e) => {
       if (e.target.closest(".delete-note-btn")) return;
+
       // Nếu global note có chapterId, mở chapter đó và highlight từ
       if (note.chapterId) {
         const chapter = story.chapters.find(c => c.id === note.chapterId);
@@ -1799,22 +1807,25 @@ function renderGlobalNotes() {
           return;
         }
       }
+
       // Nếu không có chapterId, hiện popup như cũ
       showNotePopup(note, item);
     });
+
     list.appendChild(item);
   });
 }
-
 // ================= RENDER CHAPTER NOTES (DANH SÁCH PHẲNG) =================
 ///
 
 function renderChapterNotes() {
   const story = getStory();
   const list = document.getElementById("chapterNotesList");
-  if (!list) return;
+
+  if (!story || !list) return;
 
   let allNotes = [];
+
   story.chapters.forEach(chapter => {
     chapter.notes.forEach((note, idx) => {
       allNotes.push({
@@ -1837,10 +1848,13 @@ function renderChapterNotes() {
 
   let html = '';
   allNotes.forEach(note => {
+    const hasImage = note.images && note.images.length > 0;
+    const imageBadge = hasImage ? `<span class="note-image-badge">✦</span>` : '';
+
     html += `
       <div class="note-list-item" data-chapter-id="${note.chapterId}" data-note-id="${note.id}" data-note-type="chapter">
         <span class="note-badge">CHAPTER ${note.chapterNumber}</span>
-        <strong>${escapeHTML(note.selectedText)}</strong>
+        <strong>${escapeHTML(note.selectedText)} ${imageBadge}</strong>
         <p>${escapeHTML(note.content)}</p>
         <button class="delete-note-btn" data-action="delete-note">✕</button>
       </div>
@@ -1869,7 +1883,6 @@ function renderChapterNotes() {
     });
   });
 }
-
 // ================= REMOVE ANNOTATION =================
 function removeAnnotationFromContent(noteId, chapterId) {
   const story = getStory();
