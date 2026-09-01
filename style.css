@@ -199,7 +199,7 @@ textarea { resize: vertical; }
 .story-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: .2s ease; box-shadow: 0 4px 15px rgba(0,0,0,.03); }
 .story-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--purple); }
 .story-card-cover { height: 275px; background: var(--purple-soft); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.story-card-cover img { width: 100%; height: 100%; object-fit: cover; }
+.story-card-cover img { width: 100%; height: 100%; object-fit: contain; }
 .cover-empty { color: var(--purple); font-size: 34px; }
 .story-card-info { padding: 17px; }
 .story-card-info h3 { margin: 0 0 7px; color: var(--text); }
