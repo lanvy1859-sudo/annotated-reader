@@ -4,12 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MemoReader</title>
+  <meta name="description" content="MemoReader - Your personal annotated reading library." />
+  <meta property="og:title" content="MemoReader" />
+  <meta property="og:description" content="MemoReader - Your personal annotated reading library." />
+  <meta property="og:type" content="website" />
   
-  <!-- Thay thế dòng cũ bằng dòng này -->
-  <link rel="icon" type="image/svg+xml" href="cat11.svg?v=3">
-  
-  <link rel="stylesheet" href="style.css">
-  <!-- ===== Lottie Player (thay vì DotLottie) ===== -->
+  <link rel="stylesheet" href="/style.css">
+  <!-- ===== Lottie Player ===== -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
@@ -44,6 +45,15 @@
             <span>MemoReader</span>
           </div>
           <div class="top-actions">
+            <button class="theme-toggle" id="themeToggleBtn" type="button" aria-label="Toggle theme">
+              <span class="theme-toggle-track">
+                <span class="theme-toggle-knob">
+                  <span class="theme-toggle-icon sun-icon">☀</span>
+                  <span class="theme-toggle-icon moon-icon">☾</span>
+                </span>
+                <span class="theme-toggle-label">Day</span>
+              </span>
+            </button>
             <button class="btn ghost" id="importBtn">Import</button>
             <button class="btn ghost" id="exportBtn">Export</button>
             <button class="btn primary" id="addStoryBtn">＋ Add Story</button>
@@ -71,6 +81,15 @@
             <span id="storyHeaderTitle">Story</span>
           </div>
           <div class="top-actions">
+            <button class="theme-toggle" id="themeToggleBtnStory" type="button" aria-label="Toggle theme">
+              <span class="theme-toggle-track">
+                <span class="theme-toggle-knob">
+                  <span class="theme-toggle-icon sun-icon">☀</span>
+                  <span class="theme-toggle-icon moon-icon">☾</span>
+                </span>
+                <span class="theme-toggle-label">Day</span>
+              </span>
+            </button>
             <button class="btn ghost" id="storyOverviewBtn">Overview</button>
             <button class="btn ghost" id="storyEditBtn">Edit Story</button>
           </div>
@@ -114,6 +133,15 @@
             <strong id="readerChapterName"></strong>
           </div>
           <div class="reader-actions">
+            <button class="theme-toggle" id="themeToggleBtnReader" type="button" aria-label="Toggle theme">
+              <span class="theme-toggle-track">
+                <span class="theme-toggle-knob">
+                  <span class="theme-toggle-icon sun-icon">☀</span>
+                  <span class="theme-toggle-icon moon-icon">☾</span>
+                </span>
+                <span class="theme-toggle-label">Day</span>
+              </span>
+            </button>
             <button class="btn ghost" id="overviewBtn">Overview</button>
             <button class="btn ghost" id="toggleEditBtn">Edit Mode</button>
           </div>
@@ -165,7 +193,17 @@
             <span class="brand-mark">✦</span>
             <span>Overview</span>
           </div>
-          <div></div>
+          <div class="top-actions">
+            <button class="theme-toggle" id="themeToggleBtnOverview" type="button" aria-label="Toggle theme">
+              <span class="theme-toggle-track">
+                <span class="theme-toggle-knob">
+                  <span class="theme-toggle-icon sun-icon">☀</span>
+                  <span class="theme-toggle-icon moon-icon">☾</span>
+                </span>
+                <span class="theme-toggle-label">Day</span>
+              </span>
+            </button>
+          </div>
         </header>
         <main class="overview-container">
           <div class="overview-heading">
@@ -174,10 +212,10 @@
             <p class="muted">Search notes, characters, terms and chapter annotations.</p>
           </div>
           <div class="search-box">
-  <span>⌕</span>
-  <input id="noteSearch" placeholder="Search notes, terms, characters...">
-  <button id="searchModeBtn" class="btn ghost" style="font-size:13px; white-space:nowrap;"> Chapter</button>
-</div>
+            <span>⌕</span>
+            <input id="noteSearch" placeholder="Search notes, terms, characters...">
+            <button id="searchModeBtn" class="btn ghost" style="font-size:13px; white-space:nowrap;"> Chapter</button>
+          </div>
           <div id="searchResults"></div>
           <div class="overview-grid">
             <section class="overview-card">
@@ -253,6 +291,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js"></script>
+  <script type="module" src="/script.js"></script>
 </body>
 </html>

@@ -1,27 +1,65 @@
 /* =========================================================
-   ANNOTATED READER
+   ANNOTATED READER (MemoReader)
    Frontend prototype - SUPABASE INTEGRATION
    ========================================================= */
 
-// ================= ANIMATION DATA (Embedded JSON) =================
-const animationData = {"nm":"book 2","ddd":0,"h":1080,"w":1080,"meta":{"g":"LottieFiles AE "},"layers":[{"ty":0,"nm":"book","sr":0.7,"st":0,"op":158.2,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":true,"ao":0,"ks":{"a":{"a":0,"k":[521.69,510.238,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[540,540,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"masksProperties":[{"nm":"Mask 1","inv":false,"mode":"a","x":{"a":0,"k":0,"ix":4},"o":{"a":0,"k":100,"ix":3},"pt":{"a":0,"k":{"c":true,"i":[[0,0],[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0],[0,0]],"v":[[772.38,284.476],[271,284.476],[271,736],[772.38,736]]},"ix":1}}],"w":1080,"h":1080,"refId":"comp_0","tm":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[0],"t":0},{"s":[0.367],"t":14.9994140625}],"ix":2,"x":"var $bm_rt;\n$bm_rt = loopOut();"},"ind":1},{"ty":4,"nm":"bk","sr":1,"st":0,"op":202,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[540,540,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Rectangle 1","ix":1,"cix":2,"np":3,"it":[{"ty":"rc","bm":0,"hd":false,"mn":"ADBE Vector Shape - Rect","nm":"Rectangle Path 1","d":1,"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":0,"ix":4},"s":{"a":0,"k":[1277.193,1227.148],"ix":2}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[-5.404,41.574],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":2}],"v":"4.8.0","fr":55,"op":15,"ip":0,"assets":[{"nm":"","id":"comp_0","layers":[{"ty":4,"nm":"Shape Layer 1","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[540,540,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Rectangle 1","ix":1,"cix":2,"np":3,"it":[{"ty":"rc","bm":0,"hd":false,"mn":"ADBE Vector Shape - Rect","nm":"Rectangle Path 1","d":1,"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":0,"ix":4},"s":{"a":0,"k":[179.519,42.92],"ix":2}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[-33.24,216.54],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":1},{"ty":4,"nm":"r1 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[42.225,223.66,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[548.034,518.095,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,2.429],[0,0],[0.859,-1.796],[0,0]],"o":[[0,0],[0.986,-2.219],[0,0],[0,-1.99],[0,0],[0,0]],"v":[[-27.225,208.66],[25.729,89.533],[27.225,82.484],[27.225,-206.058],[23.668,-206.864],[-27.225,-100.454]]}],"t":-2},{"s":[{"c":true,"i":[[0,0],[0,0],[0,2.429],[0,0],[0.859,-1.796],[0,0]],"o":[[0,0],[0.986,-2.219],[0,0],[0,-1.99],[0,0],[0,0]],"v":[[-27.225,208.66],[-27.521,89.452],[-27.775,82.403],[-27.775,-206.139],[-28.082,-205.695],[-27.225,-100.454]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[42.225,223.66],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":2},{"ty":4,"nm":"l1 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[42.226,223.66,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[493.583,518.095,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,2.429],[0,0],[0.087,-0.65],[0,0]],"o":[[0,0],[-0.103,-4.797],[0,0],[0,-1.99],[0,0],[0,0]],"v":[[27.226,208.66],[27.52,99.952],[27.524,78.653],[27.774,-206.139],[27.83,-199.945],[27.226,-100.454]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,2.429],[0,0],[-0.858,-1.796],[0,0]],"o":[[0,0],[-0.986,-2.219],[0,0],[0,-1.99],[0,0],[0,0]],"v":[[27.226,208.66],[-25.73,89.533],[-27.226,82.484],[-27.226,-206.058],[-23.67,-206.864],[27.226,-100.454]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[42.225,223.66],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":3},{"ty":4,"nm":"l1 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[42.226,223.66,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[493.583,518.095,0],"t":0,"ti":[13.667,-4.474,0],"to":[-13.667,4.474,0]},{"s":[411.583,544.939,0],"t":22}],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,2.429],[0,0],[-0.858,-1.796],[0,0]],"o":[[0,0],[-0.986,-2.219],[0,0],[0,-1.99],[0,0],[0,0]],"v":[[27.226,208.66],[-25.73,89.533],[-27.226,82.484],[-27.226,-206.058],[-23.67,-206.864],[27.226,-100.454]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,2.594],[0,0],[-5.198,-3.18],[0,0]],"o":[[0,0],[-2.15,-1.45],[0,0],[0,-6.094],[0,0],[0,0]],"v":[[111.169,181.035],[-23.787,90.044],[-27.226,83.576],[-27.226,-198.826],[-15.355,-205.48],[111.169,-128.079]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[42.225,223.66],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":4},{"ty":4,"nm":"l2 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[84.197,209.848,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[451.611,531.907,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,2.594],[0,0],[-5.198,-3.18],[0,0]],"o":[[0,0],[-2.15,-1.45],[0,0],[0,-6.094],[0,0],[0,0]],"v":[[69.197,194.847],[-65.758,103.856],[-69.197,97.388],[-69.197,-185.014],[-57.326,-191.667],[69.197,-114.266]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,2.594],[0,0],[-14.035,-3.24],[0,0]],"o":[[0,0],[-2.15,-1.45],[0,0],[0.816,-9.144],[0,0],[0,0]],"v":[[69.197,194.847],[-111.258,145.856],[-114.697,139.388],[-114.677,-144.264],[-95.076,-152.417],[69.197,-114.266]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[84.197,209.848],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":5},{"ty":4,"nm":"r2 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[84.197,209.848,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[590.005,531.907,0],"t":0,"ti":[0,4.667,0],"to":[0,-4.667,0]},{"s":[590.005,503.907,0],"t":22}],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,2.594],[0,0],[5.198,-3.18],[0,0]],"o":[[0,0],[2.15,-1.45],[0,0],[0,-6.094],[0,0],[0,0]],"v":[[-69.197,194.847],[65.758,103.856],[69.197,97.388],[69.197,-185.014],[57.326,-191.667],[-69.197,-114.266]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,2.429],[0,0],[0.859,-1.796],[0,0]],"o":[[0,0],[0.986,-2.219],[0,0],[0,-1.99],[0,0],[0,0]],"v":[[-69.197,222.472],[-16.242,103.346],[-14.746,96.296],[-14.746,-192.245],[-18.303,-193.051],[-69.197,-86.641]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[84.197,209.848],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":6},{"ty":4,"nm":"r3 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[106.714,190.271,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[612.522,551.483,0],"t":0,"ti":[0,6.833,0],"to":[0,-6.833,0]},{"s":[612.522,510.483,0],"t":22}],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,3.522],[0,0],[4.889,-1.133],[0,0]],"o":[[0,0],[3.4,-0.922],[0,0],[0,-5.019],[0,0],[0,0]],"v":[[-91.714,175.272],[85.954,127.116],[91.714,119.587],[91.714,-166.54],[82.153,-174.139],[-91.714,-133.842]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,2.594],[0,0],[5.198,-3.18],[0,0]],"o":[[0,0],[2.15,-1.45],[0,0],[0,-6.094],[0,0],[0,0]],"v":[[-91.714,214.423],[43.241,123.433],[46.68,116.964],[46.68,-165.437],[34.809,-172.091],[-91.714,-94.69]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[106.714,190.272],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]},{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 2","ix":2,"cix":2,"np":1,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":0,"k":{"c":true,"i":[[0,0],[0,0],[0,2.594],[0,0],[5.198,-3.18],[0,0]],"o":[[0,0],[2.15,-1.45],[0,0],[0,-6.094],[0,0],[0,0]],"v":[[15,404.695],[149.955,313.704],[153.394,307.236],[153.394,24.834],[141.523,18.18],[15,95.581]]},"ix":2}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[0,0],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":7},{"ty":4,"nm":"r4 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[117.109,176.496,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[622.918,565.259,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[10.77,0],[0,0]],"o":[[0,0],[10.77,0],[0,0],[0,10.769],[0,0],[0,0]],"v":[[-102.109,-147.618],[82.608,-161.496],[102.109,-141.995],[102.109,127.631],[82.608,147.132],[-102.109,161.496]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[4.099,-1.016],[0,0]],"o":[[0,0],[9.349,-1.763],[0,0],[-0.527,5.11],[0,0],[0,0]],"v":[[-102.109,-147.618],[69.108,-186.871],[81.109,-173.995],[81.109,105.631],[70.608,114.132],[-102.109,161.496]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[117.109,176.496],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":8},{"ty":4,"nm":"r4 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[117.109,176.496,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[622.918,565.259,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[10.77,0],[0,0]],"o":[[0,0],[10.77,0],[0,0],[0,10.769],[0,0],[0,0]],"v":[[-102.109,-147.618],[84.526,-162.192],[104.027,-142.69],[104.109,141.435],[84.608,160.936],[-102.109,161.496]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[10.77,0],[0,0]],"o":[[0,0],[10.77,0],[0,0],[0,10.769],[0,0],[0,0]],"v":[[-102.109,-147.618],[84.108,-161.728],[103.609,-142.227],[103.609,127.399],[84.108,146.9],[-102.109,161.496]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[117.109,176.496],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":9},{"ty":4,"nm":"r4 Outlines 2","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[117.109,176.496,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[622.918,565.259,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[10.77,0],[0,0]],"o":[[0,0],[10.77,0],[0,0],[0,10.769],[0,0],[0,0]],"v":[[-102.109,-147.618],[84.526,-162.192],[104.027,-142.69],[104.109,141.436],[84.608,160.936],[-102.109,161.496]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[10.77,0],[0,0]],"o":[[0,0],[10.77,0],[0,0],[0,10.769],[0,0],[0,0]],"v":[[-102.109,-147.618],[84.526,-162.192],[104.027,-142.69],[104.109,141.435],[84.608,160.936],[-102.109,161.496]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[117.109,176.496],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":10},{"ty":4,"nm":"l3 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[106.714,190.271,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[429.094,551.483,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,3.522],[0,0],[-4.889,-1.133],[0,0]],"o":[[0,0],[-3.4,-0.922],[0,0],[0,-5.019],[0,0],[0,0]],"v":[[91.714,175.272],[-85.954,127.116],[-91.714,119.587],[-91.714,-166.54],[-82.153,-174.139],[91.714,-133.842]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[1.204,20.18],[0,0],[-15.441,3.155],[0,0]],"o":[[0,0],[-2.14,-0.349],[0,0],[0,-5.019],[0,0],[0,0]],"v":[[91.714,175.272],[-90.204,161.616],[-113.798,141.087],[-113.714,-124.54],[-96.653,-148.639],[91.714,-133.842]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[106.714,190.272],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":11},{"ty":4,"nm":"l4 Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[117.109,176.496,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[418.699,565.259,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[-10.77,0],[0,0]],"o":[[0,0],[-10.77,0],[0,0],[0,10.769],[0,0],[0,0]],"v":[[102.109,-147.618],[-82.609,-161.496],[-102.109,-141.995],[-102.109,127.631],[-82.609,147.132],[102.109,161.496]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[-10.77,0],[0,0]],"o":[[0,0],[-10.77,0],[0,0],[0,10.769],[0,0],[0,0]],"v":[[102.109,-147.618],[-84.629,-154.728],[-104.13,-135.227],[-104.109,142.399],[-84.609,161.9],[102.109,161.496]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[117.109,176.496],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":12},{"ty":4,"nm":"l4 Outlines 2","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[117.109,176.496,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[418.699,565.259,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[-10.77,0],[0,0]],"o":[[0,0],[-10.77,0],[0,0],[0,10.769],[0,0],[0,0]],"v":[[102.109,-147.618],[-84.17,-157.478],[-103.671,-137.977],[-104.609,142.399],[-85.109,161.9],[102.109,161.496]]}],"t":0},{"s":[{"c":true,"i":[[0,0],[0,0],[0,-10.77],[0,0],[-10.77,0],[0,0]],"o":[[0,0],[-10.77,0],[0,0],[0,10.769],[0,0],[0,0]],"v":[[102.109,-147.618],[-84.17,-156.978],[-103.671,-137.477],[-104.609,142.399],[-85.109,161.9],[102.109,161.496]]}],"t":22}],"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[117.109,176.496],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":13},{"ty":4,"nm":"bk Outlines","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[231.164,169.557,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[520.808,572.198,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 1","ix":1,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":0,"k":{"c":true,"i":[[0,0],[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0],[0,0]],"v":[[23.238,-4.864],[-23.238,-4.864],[-23.238,4.864],[23.238,4.864]]},"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[231.164,328.978],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]},{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Group 2","ix":2,"cix":2,"np":3,"it":[{"ty":"sh","bm":0,"hd":false,"mn":"ADBE Vector Shape - Group","nm":"Path 1","ix":1,"d":1,"ks":{"a":0,"k":{"c":true,"i":[[11.745,0],[0,0],[0,-11.746],[0,0],[-11.746,0],[0,0],[0,11.746],[0,0]],"o":[[0,0],[-11.746,0],[0,0],[0,11.746],[0,0],[11.745,0],[0,0],[0,-11.746]],"v":[[194.896,-154.557],[-194.896,-154.557],[-216.164,-133.289],[-216.164,133.289],[-194.896,154.557],[194.896,154.557],[216.164,133.289],[216.164,-133.289]]},"ix":2}},{"ty":"st","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Stroke","nm":"Stroke 1","lc":1,"lj":1,"ml":10,"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":3}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[0.5451,0.3608,0.9647],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[231.164,169.557],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":14},{"ty":4,"nm":"bk","sr":1,"st":0,"op":142,"ip":0,"hd":false,"ddd":0,"bm":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6},"sk":{"a":0,"k":0},"p":{"a":0,"k":[540,540,0],"ix":2},"r":{"a":0,"k":0,"ix":10},"sa":{"a":0,"k":0},"o":{"a":0,"k":100,"ix":11}},"ef":[],"shapes":[{"ty":"gr","bm":0,"hd":false,"mn":"ADBE Vector Group","nm":"Rectangle 1","ix":1,"cix":2,"np":3,"it":[{"ty":"rc","bm":0,"hd":false,"mn":"ADBE Vector Shape - Rect","nm":"Rectangle Path 1","d":1,"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":0,"ix":4},"s":{"a":0,"k":[1129.546,1117.877],"ix":2}},{"ty":"fl","bm":0,"hd":false,"mn":"ADBE Vector Graphic - Fill","nm":"Fill 1","c":{"a":0,"k":[1,1,1],"ix":4},"r":1,"o":{"a":0,"k":100,"ix":5}},{"ty":"tr","a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"sk":{"a":0,"k":0,"ix":4},"p":{"a":0,"k":[-5.227,4.939],"ix":2},"r":{"a":0,"k":0,"ix":6},"sa":{"a":0,"k":0,"ix":5},"o":{"a":0,"k":100,"ix":7}}]}],"ind":15}]}]};
+import { animationData } from './animation.js';
 
 // ================= SUPABASE CLIENT =================
 const SUPABASE_URL = 'https://elkdtrlumfghrsykqvty.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsa2R0cmx1bWZnaHJzeWtxdnR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2MzA3NTksImV4cCI6MjEwMzIwNjc1OX0.mZPwCV_lE2-0HozC8xAQ58pFtkbZK91eY62wAelXo6s';
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let _supabase = null;
+if (window.supabase && typeof window.supabase.createClient === 'function') {
+  _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
 
 async function autoLogin() {
-  await _supabase.auth.signInWithPassword({
-    email: 'lanvy1859@gmail.com',
-    password: 'lanvy1402'
-  });
+  if (!_supabase) return;
+  try {
+    await _supabase.auth.signInWithPassword({
+      email: 'lanvy1859@gmail.com',
+      password: 'lanvy1402'
+    });
+  } catch (err) {
+    console.warn('AutoLogin err:', err);
+  }
 }
 autoLogin();
 
 // ================= STATE =================
 const STORAGE_KEY = "annotated_reader_v1";
 const NAV_STATE_KEY = "annotated_reader_nav";
+const THEME_KEY = "annotated_reader_theme";
+
+let currentTheme = localStorage.getItem(THEME_KEY) || "light";
+function applyTheme(theme, save = true) {
+  currentTheme = theme === "dark" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  if (save) {
+    try {
+      localStorage.setItem(THEME_KEY, currentTheme);
+    } catch (e) {}
+  }
+  updateThemeToggleUI();
+}
+
+function updateThemeToggleUI() {
+  const isDark = currentTheme === "dark";
+  const labelText = isDark ? "Night" : "Day";
+  const buttons = document.querySelectorAll(".theme-toggle");
+  buttons.forEach(btn => {
+    const label = btn.querySelector(".theme-toggle-label");
+    if (label) label.textContent = labelText;
+    btn.setAttribute("title", isDark ? "Switch to Day mode" : "Switch to Night mode");
+  });
+}
+
+function toggleTheme() {
+  const newTheme = currentTheme === "dark" ? "light" : "dark";
+  applyTheme(newTheme, true);
+  toast(`Switched to ${newTheme === "dark" ? "Night" : "Day"} mode`);
+}
 
 let state = { stories: [] };
 let currentStoryId = null;
@@ -32,8 +70,10 @@ let selectedText = "";
 let pendingNoteType = "chapter";
 let pendingImages = [];
 let searchMode = 'content'; // 'content' hoặc 'chapter'
+
 // === THANH TIẾN ĐỘ ĐỌC ===
 const readingProgressBar = document.getElementById('readingProgressBar');
+
 // ================= DEFAULT DATA =================
 function createDemoStory() {
   const chapter1Id = uid();
@@ -163,10 +203,14 @@ function clearNavigationState() {
 async function initApp() {
   startProgress();
 
-  await loadFromSupabase();
+  if (_supabase) {
+    await loadFromSupabase();
+  } else {
+    state = loadState();
+  }
 
-  if (!state.stories.length) {
-    state.stories.push(createDemoStory());
+  if (!state.stories || !state.stories.length) {
+    state.stories = [createDemoStory()];
   }
 
   const savedNav = restoreNavigationState();
@@ -179,7 +223,6 @@ async function initApp() {
       renderReader();
       showView('readerView');
 
-      // Xử lý thanh tiến độ
       if (readingProgressBar) {
         readingProgressBar.classList.remove('reading-progress-hidden');
         setTimeout(updateReadingProgress, 100);
@@ -211,11 +254,6 @@ async function initApp() {
     }
   }
 
-  // Nếu không khôi phục được trạng thái
- 
-  // Nếu không khôi phục được trạng thái, về mặc định
- 
-
   renderLibrary();
   showView('libraryView');
   clearNavigationState();
@@ -244,11 +282,11 @@ function getChapter() {
 }
 function showView(id) {
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  const viewEl = document.getElementById(id);
+  if (viewEl) viewEl.classList.add("active");
   currentView = id;
   saveNavigationState();
 
-  // === XỬ LÝ THANH TIẾN ĐỘ ĐỌC ===
   if (id === 'readerView') {
     if (readingProgressBar) {
       readingProgressBar.classList.remove('reading-progress-hidden');
@@ -263,6 +301,7 @@ function showView(id) {
 }
 function toast(message) {
   const el = document.getElementById("toast");
+  if (!el) return;
   el.textContent = message;
   el.classList.add("show");
   clearTimeout(window.__toastTimer);
@@ -296,7 +335,7 @@ function updateReadingProgress() {
 window.addEventListener('scroll', () => {
   if (currentView === 'readerView') {
     saveNavigationState();
-    updateReadingProgress(); // thêm dòng này
+    updateReadingProgress();
   }
 });
 
@@ -355,8 +394,8 @@ async function loadFromSupabase() {
     }
 
     state.stories = stories.map(story => {
-      const storyChapters = chapters.filter(c => c.story_id === story.id);
-      const storyNotes = notes.filter(n => n.story_id === story.id);
+      const storyChapters = (chapters || []).filter(c => c.story_id === story.id);
+      const storyNotes = (notes || []).filter(n => n.story_id === story.id);
 
       const globalNotes = storyNotes.filter(n => n.type === 'global');
 
@@ -411,9 +450,9 @@ async function loadFromSupabase() {
     toast('Dữ liệu đã tải từ Supabase');
   } catch (error) {
     console.error('Lỗi tải dữ liệu:', error);
-    toast('Lỗi tải dữ liệu, kiểm tra kết nối');
-    if (!state.stories.length) {
-      state.stories.push(createDemoStory());
+    state = loadState();
+    if (!state.stories || !state.stories.length) {
+      state.stories = [createDemoStory()];
     }
     renderLibrary();
   }
@@ -429,9 +468,12 @@ const loadingScreen = document.getElementById('loading-screen');
 const mainContent = document.getElementById('main-content');
 const player = document.getElementById('bookAnim');
 
-// Load animation data trực tiếp từ biến
 if (player && animationData) {
-  player.load(animationData);
+  try {
+    player.load(animationData);
+  } catch (e) {
+    console.warn('Lottie load error', e);
+  }
 }
 
 function updateProgress(value) {
@@ -457,7 +499,7 @@ function startProgress() {
       clearInterval(progressInterval);
       progressInterval = null;
     }
-  }, 50);
+  }, 40);
 }
 
 function completeLoading() {
@@ -482,10 +524,74 @@ function finishLoading() {
   }, 500);
 }
 
+// ================= CONFIRM DIALOG =================
+function showConfirmDialog({
+  title = "Confirm Action",
+  message = "Are you sure you want to proceed?",
+  confirmText = "Delete",
+  cancelText = "Cancel",
+  danger = true
+} = {}) {
+  return new Promise(resolve => {
+    let modal = document.getElementById("customConfirmModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "customConfirmModal";
+      modal.className = "custom-modal-overlay";
+      document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+      <div class="custom-modal-dialog">
+        <div class="custom-modal-header">
+          <h3>${escapeHTML(title)}</h3>
+          <button class="custom-modal-close" id="modalCloseBtn" type="button">×</button>
+        </div>
+        <div class="custom-modal-body">
+          <p style="margin:0;">${escapeHTML(message).replace(/\n/g, '<br>')}</p>
+        </div>
+        <div class="custom-modal-footer">
+          <button class="btn ghost" id="modalCancelBtn" type="button">${escapeHTML(cancelText)}</button>
+          <button class="btn ${danger ? 'danger' : 'primary'}" id="modalConfirmBtn" type="button">${escapeHTML(confirmText)}</button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.add("active");
+
+    const cleanup = (confirmed) => {
+      modal.classList.remove("active");
+      resolve(confirmed);
+    };
+
+    document.getElementById("modalCloseBtn")?.addEventListener("click", () => cleanup(false));
+    document.getElementById("modalCancelBtn")?.addEventListener("click", () => cleanup(false));
+    document.getElementById("modalConfirmBtn")?.addEventListener("click", () => cleanup(true));
+    
+    modal.onclick = (e) => {
+      if (e.target === modal) cleanup(false);
+    };
+  });
+}
+
 // ================= LIBRARY =================
 function renderLibrary() {
   const grid = document.getElementById("storyGrid");
+  if (!grid) return;
   grid.innerHTML = "";
+  
+  if (!state.stories || state.stories.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--muted);">
+        <p style="font-size: 18px; margin-bottom: 15px;">No stories in your library yet.</p>
+        <button class="btn primary" id="emptyAddStoryBtn">＋ Add New Story</button>
+      </div>
+    `;
+    document.getElementById("emptyAddStoryBtn")?.addEventListener("click", () => {
+      document.getElementById("addStoryBtn")?.click();
+    });
+    return;
+  }
+
   state.stories.forEach(story => {
     const card = document.createElement("div");
     card.className = "story-card";
@@ -494,11 +600,14 @@ function renderLibrary() {
         ${story.cover ? `<img src="${story.cover}" alt="">` : `<div class="cover-empty">✦</div>`}
       </div>
       <div class="story-card-info">
-        <h3>${escapeHTML(story.title || "Untitled Story")}</h3>
+        <h3 style="margin:0 0 6px 0; word-break: break-word;">${escapeHTML(story.title || "Untitled Story")}</h3>
         <p>${story.chapters.length} ${story.chapters.length === 1 ? "Chapter" : "Chapters"}</p>
       </div>
     `;
-    card.addEventListener("click", () => openStory(story.id));
+    
+    card.addEventListener("click", () => {
+      openStory(story.id);
+    });
     grid.appendChild(card);
   });
 }
@@ -532,22 +641,29 @@ function renderStory() {
 function renderChapterList() {
   const story = getStory();
   const list = document.getElementById("chapterList");
+  if (!list || !story) return;
   list.innerHTML = "";
+  if (!story.chapters || story.chapters.length === 0) {
+    list.innerHTML = `<p class="muted" style="padding: 10px 0;">Chưa có chương nào. Nhấn nút ＋ phía trên để thêm chương.</p>`;
+    return;
+  }
   story.chapters.sort((a,b) => a.number - b.number).forEach(chapter => {
     const item = document.createElement("div");
     item.className = "chapter-item";
     item.innerHTML = `
-      <div>
+      <div style="flex:1; min-width:0; padding-right:12px;">
         <span class="chapter-number">CHAPTER ${chapter.number}</span>
         <span class="chapter-item-title">${escapeHTML(chapter.title || "Untitled Chapter")}</span>
       </div>
       <div class="chapter-item-actions">
-        <button class="btn ghost chapter-delete" data-delete="${chapter.id}">Delete</button>
+        <button class="btn ghost chapter-delete" data-delete-chapter="${chapter.id}">Delete</button>
       </div>
     `;
     item.addEventListener("click", event => {
-      if (event.target.dataset.delete) {
-        deleteChapter(event.target.dataset.delete);
+      const delBtn = event.target.closest("[data-delete-chapter]");
+      if (delBtn) {
+        event.stopPropagation();
+        deleteChapter(delBtn.getAttribute("data-delete-chapter"));
         return;
       }
       openChapter(chapter.id);
@@ -557,9 +673,10 @@ function renderChapterList() {
 }
 
 // ================= ADD STORY =================
-document.getElementById("addStoryBtn").addEventListener("click", async () => {
+document.getElementById("addStoryBtn")?.addEventListener("click", async () => {
+  const newId = uid();
   const story = {
-    id: uid(),
+    id: newId,
     title: "Untitled Story",
     description: "",
     cover: "",
@@ -567,54 +684,68 @@ document.getElementById("addStoryBtn").addEventListener("click", async () => {
     globalNotes: []
   };
   state.stories.push(story);
+  currentStoryId = story.id;
+  
+  saveState(false);
+  renderLibrary();
+  openStory(story.id);
+
   try {
-    const { data, error } = await _supabase
-      .from('stories')
-      .insert({
-        id: story.id,
-        title: story.title,
-        description: story.description,
-        cover_url: story.cover,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select();
-    if (error) throw error;
-    saveState(false);
-    renderLibrary();
-    openStory(story.id);
+    if (_supabase) {
+      const { data, error } = await _supabase
+        .from('stories')
+        .insert({
+          id: story.id,
+          title: story.title,
+          description: story.description,
+          cover_url: story.cover,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select();
+      if (error) {
+        console.warn('Supabase story insert warning:', error);
+      } else if (data && data[0] && data[0].id) {
+        const originalId = story.id;
+        story.id = data[0].id;
+        if (currentStoryId === originalId) {
+          currentStoryId = story.id;
+        }
+        saveState(false);
+      }
+    }
     toast("New story created");
   } catch (err) {
-    console.error(err);
-    toast('Lỗi tạo story: ' + err.message);
-    state.stories = state.stories.filter(s => s.id !== story.id);
-    renderLibrary();
+    console.warn("Supabase addStory err:", err);
+    toast("New story created");
   }
 });
 
 // ================= SAVE STORY =================
-document.getElementById("saveStoryBtn").addEventListener("click", async () => {
+document.getElementById("saveStoryBtn")?.addEventListener("click", async () => {
   const story = getStory();
   if (!story) return;
   story.title = document.getElementById("storyTitleInput").value.trim() || "Untitled Story";
   story.description = document.getElementById("storyDescriptionInput").value;
 
   try {
-    const { data, error } = await _supabase
-      .from('stories')
-      .upsert({
-        id: story.id,
-        title: story.title,
-        description: story.description,
-        cover_url: story.cover || null,
-        updated_at: new Date().toISOString()
-      })
-      .select();
+    if (_supabase) {
+      const { data, error } = await _supabase
+        .from('stories')
+        .upsert({
+          id: story.id,
+          title: story.title,
+          description: story.description,
+          cover_url: story.cover || null,
+          updated_at: new Date().toISOString()
+        })
+        .select();
 
-    if (error) throw error;
-    if (data && data[0]) {
-      story.id = data[0].id;
-      story.cover = data[0].cover_url || '';
+      if (error) throw error;
+      if (data && data[0]) {
+        story.id = data[0].id;
+        story.cover = data[0].cover_url || '';
+      }
     }
     saveState(false);
     toast("Story saved");
@@ -622,101 +753,149 @@ document.getElementById("saveStoryBtn").addEventListener("click", async () => {
     renderLibrary();
   } catch (err) {
     console.error(err);
-    toast('Lỗi lưu story: ' + err.message);
+    saveState(false);
+    toast("Story saved locally");
+    renderStory();
+    renderLibrary();
   }
 });
 
 // ================= COVER =================
-document.getElementById("coverPlaceholder").addEventListener("click", () => {
-  document.getElementById("coverInput").click();
+document.getElementById("coverPlaceholder")?.addEventListener("click", () => {
+  document.getElementById("coverInput")?.click();
 });
-document.getElementById("storyCover").addEventListener("click", () => {
-  document.getElementById("coverInput").click();
+document.getElementById("storyCover")?.addEventListener("click", () => {
+  document.getElementById("coverInput")?.click();
 });
-document.getElementById("coverInput").addEventListener("change", async (event) => {
+document.getElementById("coverInput")?.addEventListener("change", async (event) => {
   const file = event.target.files[0];
   if (!file) return;
   const story = getStory();
   if (!story) return;
 
   try {
-    const filePath = `covers/${Date.now()}_${file.name}`;
-    const { data, error: uploadErr } = await _supabase.storage
-      .from('reader-images')
-      .upload(filePath, file);
-    if (uploadErr) throw uploadErr;
+    if (_supabase) {
+      const filePath = `covers/${Date.now()}_${file.name}`;
+      const { error: uploadErr } = await _supabase.storage
+        .from('reader-images')
+        .upload(filePath, file);
+      if (uploadErr) throw uploadErr;
 
-    const { data: urlData } = _supabase.storage
-      .from('reader-images')
-      .getPublicUrl(filePath);
-    const coverUrl = urlData.publicUrl;
+      const { data: urlData } = _supabase.storage
+        .from('reader-images')
+        .getPublicUrl(filePath);
+      const coverUrl = urlData.publicUrl;
 
-    if (story.cover && story.cover.includes('reader-images')) {
-      const oldPath = story.cover.split('/reader-images/')[1];
-      if (oldPath) {
-        await _supabase.storage.from('reader-images').remove([oldPath]);
+      if (story.cover && story.cover.includes('reader-images')) {
+        const oldPath = story.cover.split('/reader-images/')[1];
+        if (oldPath) {
+          await _supabase.storage.from('reader-images').remove([oldPath]);
+        }
       }
-    }
 
-    story.cover = coverUrl;
-    const { error: updateErr } = await _supabase
-      .from('stories')
-      .update({ cover_url: coverUrl, updated_at: new Date().toISOString() })
-      .eq('id', story.id);
-    if (updateErr) throw updateErr;
+      story.cover = coverUrl;
+      await _supabase
+        .from('stories')
+        .update({ cover_url: coverUrl, updated_at: new Date().toISOString() })
+        .eq('id', story.id);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        story.cover = e.target.result;
+        saveState(false);
+        renderStory();
+        renderLibrary();
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
 
     toast('Cover updated');
     renderStory();
     renderLibrary();
   } catch (err) {
     console.error(err);
-    toast('Lỗi upload cover: ' + err.message);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      story.cover = e.target.result;
+      saveState(false);
+      renderStory();
+      renderLibrary();
+    };
+    reader.readAsDataURL(file);
+    toast('Cover saved locally');
   }
 });
 
 // ================= DELETE STORY =================
-document.getElementById("deleteStoryBtn").addEventListener("click", async () => {
-  const story = getStory();
+async function deleteStory(storyId) {
+  if (!storyId) return;
+  const story = state.stories.find(s => s.id === storyId);
   if (!story) return;
-  const ok = confirm(`Delete "${story.title}"?\n\nThis will delete all chapters, notes, and images.`);
+
+  const ok = await showConfirmDialog({
+    title: "Delete Story",
+    message: `Are you sure you want to delete "${story.title || 'Untitled Story'}"?\n\nAll ${story.chapters?.length || 0} chapters, notes, and illustrations will be permanently removed.`,
+    confirmText: "Delete Story",
+    cancelText: "Cancel",
+    danger: true
+  });
   if (!ok) return;
 
-  try {
-    const { data: notes, error: noteErr } = await _supabase
-      .from('notes')
-      .select('id, source')
-      .eq('story_id', story.id);
-    if (noteErr) throw noteErr;
-
-    for (const note of notes) {
-      if (note.source) {
-        await deleteImageFromStorage(note.source);
-      }
-    }
-
-    if (story.cover) {
-      await deleteImageFromStorage(story.cover);
-    }
-
-    await _supabase.from('chapters').delete().eq('story_id', story.id);
-    await _supabase.from('notes').delete().eq('story_id', story.id);
-    await _supabase.from('stories').delete().eq('id', story.id);
-
-    state.stories = state.stories.filter(s => s.id !== currentStoryId);
+  // Optimistic UI update immediately
+  const storyCopy = { ...story };
+  state.stories = state.stories.filter(s => s.id !== storyId);
+  if (currentStoryId === storyId) {
     currentStoryId = null;
-    saveState(false);
-    renderLibrary();
-    showView('libraryView');
-    toast('Story deleted');
-  } catch (err) {
-    console.error(err);
-    toast('Lỗi xóa story: ' + err.message);
+    currentChapterId = null;
+  }
+  saveState(false);
+  clearNavigationState();
+  renderLibrary();
+  showView('libraryView');
+  toast(`Story "${storyCopy.title || 'Untitled Story'}" deleted`);
+
+  // Background remote cleanup
+  (async () => {
+    try {
+      if (_supabase) {
+        if (storyCopy.cover) {
+          await deleteImageFromStorage(storyCopy.cover);
+        }
+        const { data: notes } = await _supabase
+          .from('notes')
+          .select('id, source')
+          .eq('story_id', storyId);
+
+        if (notes) {
+          for (const note of notes) {
+            if (note.source) {
+              await deleteImageFromStorage(note.source);
+            }
+          }
+        }
+
+        await _supabase.from('notes').delete().eq('story_id', storyId);
+        await _supabase.from('chapters').delete().eq('story_id', storyId);
+        await _supabase.from('stories').delete().eq('id', storyId);
+      }
+    } catch (err) {
+      console.warn("Supabase delete story error:", err);
+    }
+  })();
+}
+
+document.getElementById("deleteStoryBtn")?.addEventListener("click", () => {
+  const story = getStory();
+  if (story) {
+    deleteStory(story.id);
   }
 });
 
 // ================= ADD CHAPTER =================
-document.getElementById("addChapterBtn").addEventListener("click", async () => {
+document.getElementById("addChapterBtn")?.addEventListener("click", async () => {
   const story = getStory();
+  if (!story) return;
   const nextNumber = story.chapters.length ? Math.max(...story.chapters.map(c => c.number)) + 1 : 1;
   const chapter = {
     id: uid(),
@@ -728,22 +907,24 @@ document.getElementById("addChapterBtn").addEventListener("click", async () => {
   story.chapters.push(chapter);
 
   try {
-    const { data, error } = await _supabase
-      .from('chapters')
-      .insert({
-        id: chapter.id,
-        story_id: story.id,
-        title: chapter.title,
-        content: chapter.content,
-        chapter_order: chapter.number,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select();
+    if (_supabase) {
+      const { data, error } = await _supabase
+        .from('chapters')
+        .insert({
+          id: chapter.id,
+          story_id: story.id,
+          title: chapter.title,
+          content: chapter.content,
+          chapter_order: chapter.number,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select();
 
-    if (error) throw error;
-    if (data && data[0]) {
-      chapter.id = data[0].id;
+      if (error) throw error;
+      if (data && data[0]) {
+        chapter.id = data[0].id;
+      }
     }
     saveState(false);
     renderChapterList();
@@ -751,46 +932,69 @@ document.getElementById("addChapterBtn").addEventListener("click", async () => {
     toast(`Chapter ${nextNumber} created`);
   } catch (err) {
     console.error(err);
-    story.chapters = story.chapters.filter(c => c.id !== chapter.id);
-    toast('Lỗi tạo chapter: ' + err.message);
+    saveState(false);
+    renderChapterList();
+    openChapter(chapter.id);
+    toast(`Chapter ${nextNumber} created locally`);
   }
 });
 
 // ================= DELETE CHAPTER =================
 async function deleteChapter(chapterId) {
   const story = getStory();
+  if (!story) return;
   const chapter = story.chapters.find(c => c.id === chapterId);
   if (!chapter) return;
-  const ok = confirm(`Delete Chapter ${chapter.number}?\n\nThis will also delete all notes and images.`);
+  const chapterNumber = chapter.number;
+  const chapterTitle = chapter.title || `Chapter ${chapterNumber}`;
+
+  const ok = await showConfirmDialog({
+    title: "Delete Chapter",
+    message: `Are you sure you want to delete Chapter ${chapterNumber} ("${chapterTitle}")?\n\nAll notes and annotations in this chapter will be deleted.`,
+    confirmText: "Delete Chapter",
+    cancelText: "Cancel",
+    danger: true
+  });
   if (!ok) return;
 
-  try {
-    const { data: notes, error } = await _supabase
-      .from('notes')
-      .select('id, source')
-      .eq('chapter_id', chapterId);
-    if (error) throw error;
-
-    for (const note of notes) {
-      if (note.source) {
-        await deleteImageFromStorage(note.source);
-      }
-    }
-
-    await _supabase.from('notes').delete().eq('chapter_id', chapterId);
-    await _supabase.from('chapters').delete().eq('id', chapterId);
-
-    story.chapters = story.chapters.filter(c => c.id !== chapterId);
-    story.chapters.sort((a,b) => a.number - b.number).forEach((ch, idx) => {
-      ch.number = idx + 1;
-    });
-    saveState(false);
-    renderChapterList();
-    toast('Chapter deleted');
-  } catch (err) {
-    console.error(err);
-    toast('Lỗi xóa chapter: ' + err.message);
+  // Optimistic UI update immediately
+  story.chapters = story.chapters.filter(c => c.id !== chapterId);
+  story.chapters.sort((a,b) => a.number - b.number).forEach((ch, idx) => {
+    ch.number = idx + 1;
+  });
+  if (currentChapterId === chapterId) {
+    currentChapterId = null;
+    renderStory();
+    showView('storyView');
   }
+  saveState(false);
+  renderChapterList();
+  toast(`Chapter ${chapterNumber} deleted`);
+
+  // Background remote cleanup
+  (async () => {
+    try {
+      if (_supabase) {
+        const { data: notes } = await _supabase
+          .from('notes')
+          .select('id, source')
+          .eq('chapter_id', chapterId);
+
+        if (notes) {
+          for (const note of notes) {
+            if (note.source) {
+              await deleteImageFromStorage(note.source);
+            }
+          }
+        }
+
+        await _supabase.from('notes').delete().eq('chapter_id', chapterId);
+        await _supabase.from('chapters').delete().eq('id', chapterId);
+      }
+    } catch (err) {
+      console.warn("Supabase delete chapter error:", err);
+    }
+  })();
 }
 
 // ================= OPEN CHAPTER =================
@@ -804,7 +1008,6 @@ function openChapter(chapterId, noteId, keyword) {
   const highlightTarget = (target, type = 'chapter') => {
     if (!target) return;
     smoothScrollTo(target, 400);
-    // Xóa class cũ
     target.classList.remove('highlight-chapter', 'highlight-global');
     if (type === 'global') {
       target.classList.add('highlight-global');
@@ -826,7 +1029,6 @@ function openChapter(chapterId, noteId, keyword) {
       }
     }, 300);
   } else if (keyword) {
-    // Tìm kiếm và highlight từ khóa (global note)
     setTimeout(() => {
       const reader = document.getElementById('readerContent');
       if (!reader) {
@@ -849,7 +1051,7 @@ function openChapter(chapterId, noteId, keyword) {
       let found = false;
       let nodes = [];
       let node;
-      while (node = walker.nextNode()) {
+      while ((node = walker.nextNode())) {
         nodes.push(node);
       }
       
@@ -872,19 +1074,17 @@ function openChapter(chapterId, noteId, keyword) {
           document.body.appendChild(dummy);
           smoothScrollTo(dummy, 400);
           setTimeout(() => {
-            document.body.removeChild(dummy);
+            if (dummy.parentNode) document.body.removeChild(dummy);
           }, 500);
           
           try {
             const highlightSpan = document.createElement('span');
             range.surroundContents(highlightSpan);
-            // Thêm class highlight-global
             highlightSpan.classList.add('highlight-global');
             setTimeout(() => {
               highlightSpan.classList.remove('highlight-global');
             }, 2000);
           } catch (e) {
-            // Fallback nếu không thể surround
             const parent = firstNode.parentNode;
             const textNode = firstNode;
             const beforeText = text.substring(0, index);
@@ -926,17 +1126,14 @@ function renderReader() {
   const reader = document.getElementById("readerContent");
   reader.innerHTML = chapter.content;
   
-  // Gán class phân biệt cho annotation
   const annotations = reader.querySelectorAll('.editor-annotation, .annotation');
   annotations.forEach(el => {
     const noteId = el.dataset.noteId;
-    // Tìm trong chapter notes
     let note = chapter.notes.find(n => n.id === noteId);
     if (note) {
       el.classList.add('chapter-note');
       el.dataset.noteType = 'chapter';
     } else {
-      // Tìm trong global notes
       const globalNote = story.globalNotes.find(n => n.id === noteId);
       if (globalNote) {
         el.classList.add('global-note');
@@ -955,10 +1152,11 @@ function activateReaderAnnotations() {
       event.stopPropagation();
       const noteId = el.dataset.noteId;
       const chapter = getChapter();
+      if (!chapter) return;
       const note = chapter.notes.find(n => n.id === noteId);
       if (!note) {
         const story = getStory();
-        const global = story.globalNotes.find(n => n.id === noteId);
+        const global = story?.globalNotes.find(n => n.id === noteId);
         if (global) {
           showNotePopup(global, el);
         }
@@ -970,42 +1168,84 @@ function activateReaderAnnotations() {
 }
 
 // ================= POPUP MANAGEMENT =================
-let isPopupOpen = false;
+function positionPopup(popup, anchor) {
+  if (!popup) return;
+  if (!anchor) {
+    popup.style.left = '50%';
+    popup.style.top = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    return;
+  }
+
+  let rect = null;
+  try {
+    if (typeof anchor.getBoundingClientRect === 'function') {
+      rect = anchor.getBoundingClientRect();
+    } else if (anchor instanceof Element) {
+      rect = anchor.getBoundingClientRect();
+    } else if (anchor.clientX !== undefined && anchor.clientY !== undefined) {
+      rect = { top: anchor.clientY, bottom: anchor.clientY, left: anchor.clientX, right: anchor.clientX, width: 0, height: 0 };
+    }
+  } catch (e) {
+    rect = null;
+  }
+
+  if (!rect || (rect.width === 0 && rect.height === 0 && rect.top === 0 && rect.left === 0)) {
+    popup.style.left = '50%';
+    popup.style.top = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    return;
+  }
+
+  popup.style.transform = 'none';
+
+  // Measure popup dimensions
+  const popupWidth = popup.offsetWidth || 340;
+  const popupHeight = popup.offsetHeight || 230;
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const margin = 14;
+
+  // Horizontal position: match anchor left or center, bounded by viewport
+  let left = rect.left;
+  if (left + popupWidth > viewportWidth - margin) {
+    left = viewportWidth - popupWidth - margin;
+  }
+  if (left < margin) {
+    left = margin;
+  }
+
+  // Vertical position: place below anchor by default, or above if not enough space below
+  let top = rect.bottom + 8;
+  const spaceBelow = viewportHeight - rect.bottom - margin;
+  const spaceAbove = rect.top - margin;
+
+  if (popupHeight > spaceBelow && spaceAbove > spaceBelow) {
+    top = Math.max(margin, rect.top - popupHeight - 8);
+  } else {
+    if (top + popupHeight > viewportHeight - margin) {
+      top = Math.max(margin, viewportHeight - popupHeight - margin);
+    }
+  }
+
+  popup.style.left = `${Math.round(left)}px`;
+  popup.style.top = `${Math.round(top)}px`;
+}
 
 function openPopup(html, anchor) {
   const popup = document.getElementById('notePopup');
+  if (!popup) return;
+  
+  if (popup._outsideHandler) {
+    document.removeEventListener('click', popup._outsideHandler, true);
+    delete popup._outsideHandler;
+  }
+
   popup.innerHTML = html;
   popup.style.position = 'fixed';
   popup.style.zIndex = '1000';
   popup.style.display = 'block';
   popup.style.visibility = 'visible';
-  
-  // Xóa handler cũ
-  if (popup._outsideHandler) {
-    document.removeEventListener('click', popup._outsideHandler);
-  }
-  
-  // Chỉ gắn handler nếu không phải là popup editor (bước 2)
-  // Vì bước 2 sẽ được mở bằng cách gọi openPopup khác
-  // Nên handler sẽ được gắn lại mỗi lần mở popup
-  
-  function handler(e) {
-    // Kiểm tra nếu click bên ngoài popup và không phải là nút confirm
-    if (!popup.contains(e.target)) {
-      // Nếu popup đang ở bước 2 (có textarea #newNoteContent), không đóng
-      if (popup.querySelector('#newNoteContent')) {
-        // Không đóng popup bước 2 khi click bên ngoài
-        return;
-      }
-      closeNotePopup();
-    }
-  }
-  
-  popup._outsideHandler = handler;
-  // Chỉ gắn handler sau một khoảng thời gian ngắn để tránh click ngay lập tức đóng popup
-  setTimeout(() => {
-    document.addEventListener('click', handler);
-  }, 100);
   
   if (anchor) {
     positionPopup(popup, anchor);
@@ -1015,19 +1255,36 @@ function openPopup(html, anchor) {
     popup.style.transform = 'translate(-50%, -50%)';
   }
   popup.classList.add('open');
-  isPopupOpen = true;
+
+  function handler(e) {
+    if (!popup.classList.contains('open')) return;
+    if (popup.contains(e.target)) return;
+    if (e.target && !document.body.contains(e.target)) return;
+    // Don't close if editing or adding note form is open
+    if (popup.querySelector('#newNoteContent') || popup.querySelector('#editNoteContent')) {
+      return;
+    }
+    closeNotePopup();
+  }
+  
+  popup._outsideHandler = handler;
+  setTimeout(() => {
+    if (popup.classList.contains('open')) {
+      document.addEventListener('click', handler, true);
+    }
+  }, 120);
 }
 
 function closePopup() {
   const popup = document.getElementById('notePopup');
+  if (!popup) return;
   if (popup._outsideHandler) {
-    document.removeEventListener('click', popup._outsideHandler);
+    document.removeEventListener('click', popup._outsideHandler, true);
     delete popup._outsideHandler;
   }
   popup.classList.remove('open');
   popup.style.display = 'none';
   popup.style.visibility = 'hidden';
-  isPopupOpen = false;
 }
 
 function closeNotePopup() {
@@ -1039,35 +1296,67 @@ window.closeNotePopup = closeNotePopup;
 function showNotePopup(note, anchor) {
   const isGlobal = note.type === "global";
   const noteLabel = isGlobal ? "Global Note" : "Chapter Note";
-  const displayText = isGlobal ? note.title : note.selectedText;
+  const icon = isGlobal ? "🪐" : "🌙";
+  const displayText = isGlobal ? (note.title || note.selectedText) : note.selectedText;
 
   const html = `
-    <div style="padding:18px; font-family: Inter, sans-serif; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); max-width: 380px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:10px;">
-        <strong style="font-size:16px; color: #7654d8;">${noteLabel}</strong>
-        <div>
-          <button onclick="editNote('${note.id}', '${isGlobal ? 'global' : 'chapter'}')" style="margin-right:8px; border:0; background:transparent; font-size:18px; color:#7654d8; cursor:pointer;" title="Edit note">✎</button>
-          <button onclick="closeNotePopup()" style="border:0; background:transparent; font-size:22px; color:#999; cursor:pointer;">×</button>
-        </div>
+    <div class="popup-header">
+      <strong class="popup-tag ${isGlobal ? 'global' : 'chapter'}">
+        <span>${icon}</span> ${noteLabel}
+      </strong>
+      <div class="popup-actions">
+        <button id="editNoteBtnTrigger" type="button" class="icon-action-btn" title="Edit note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+        </button>
+        <button id="deleteNoteBtnTrigger" type="button" class="icon-action-btn delete" title="Delete note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+        <button id="closeNotePopupBtn" type="button" class="icon-action-btn" title="Close">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
-      <div style="background:#f5f0ff; border-radius:8px; padding:10px; margin:8px 0 14px;">
-        <span style="font-size:14px; color:#555;">"${escapeHTML(displayText || "")}"</span>
-      </div>
-      <div style="font-size:15px; line-height:1.6; color:#333; margin-bottom:12px;">${escapeHTML(note.content || "").replace(/\n/g, "<br>")}</div>
-      ${note.images?.length ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;">${note.images.map(img => `<img src="${img}" style="max-width:100%; max-height:200px; border-radius:6px; object-fit:cover;">`).join("")}</div>` : ""}
-      ${note.caption ? `<div style="font-size:13px; color:#777; margin-top:6px;">${escapeHTML(note.caption)}</div>` : ""}
-      ${note.source && !note.source.includes('reader-images') ? `<div style="font-size:13px; color:#999; margin-top:4px;">📎 ${escapeHTML(note.source)}</div>` : ""}
+    </div>
+    <div class="popup-selected">
+      <span>"${escapeHTML(displayText || "")}"</span>
+    </div>
+    <div class="popup-content">
+      <div>${escapeHTML(note.content || "").replace(/\n/g, "<br>")}</div>
+      ${note.images?.length ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;">${note.images.map(img => `<img src="${img}" style="max-width:100%; max-height:200px; border-radius:8px; object-fit:cover; border:1px solid var(--border);">`).join("")}</div>` : ""}
+      ${note.caption ? `<div style="font-size:12px; color:var(--muted); margin-top:6px;">${escapeHTML(note.caption)}</div>` : ""}
+      ${note.source && !note.source.includes('reader-images') ? `<div style="font-size:12px; color:var(--muted); margin-top:4px;">📎 ${escapeHTML(note.source)}</div>` : ""}
     </div>
   `;
   openPopup(html, anchor);
+
+  document.getElementById("closeNotePopupBtn")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeNotePopup();
+  });
+
+  const editBtn = document.getElementById("editNoteBtnTrigger");
+  if (editBtn) {
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      editNote(note.id, isGlobal ? 'global' : 'chapter', anchor);
+    });
+  }
+
+  const deleteBtn = document.getElementById("deleteNoteBtnTrigger");
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      deleteNote(note.id, isGlobal ? 'global' : 'chapter');
+    });
+  }
 }
 
 // ================= EDIT NOTE =================
-function editNote(noteId, type) {
-  closeNotePopup();
+function editNote(noteId, type, anchor = null) {
   const story = getStory();
   if (!story) {
-    toast("Story not found!");
+    toast("Story not found");
     return;
   }
   let note = null;
@@ -1083,71 +1372,62 @@ function editNote(noteId, type) {
     }
   }
   if (!note) {
-    toast("Note not found!");
+    toast("Note not found");
     return;
+  }
+
+  // Find DOM anchor element if not explicitly passed
+  let effectiveAnchor = anchor;
+  if (!effectiveAnchor) {
+    effectiveAnchor = document.querySelector(`#readerContent [data-note-id="${note.id}"], #chapterEditor [data-note-id="${note.id}"]`);
   }
 
   const isGlobal = note.type === "global";
   const noteLabel = isGlobal ? "Global Note" : "Chapter Note";
+  const icon = isGlobal ? "🪐" : "🌙";
 
-  // HTML giống hệt openNoteEditor, có hiển thị ảnh hiện tại
   const html = `
-    <div style="padding:18px; font-family: Inter, sans-serif; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); max-width: 380px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:10px;">
-        <strong style="font-size:16px; color: #7654d8;">Edit ${noteLabel}</strong>
-        <button onclick="closeNotePopup()" style="border:0; background:transparent; font-size:22px; color:#999; cursor:pointer;">×</button>
-      </div>
-      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Note</label>
-      <textarea id="editNoteContent" style="width:100%; min-height:100px; border:1px solid #ddd; border-radius:8px; padding:10px; font-family:inherit; font-size:14px; outline:none;">${escapeHTML(note.content)}</textarea>
-      
-      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Illustration</label>
-      <div style="display:flex; gap:12px; align-items:stretch;">
-        <div id="editImageSlots" class="image-slots" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; align-content:center; flex:0 0 auto;">
-          ${note.images && note.images.length > 0 ? note.images.map(img => `
-            <div class="image-slot" style="position:relative; width:76px; height:76px; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
-              <img src="${img}" style="width:100%; height:100%; object-fit:cover;">
-              <button class="image-remove" data-image="${img}" style="position:absolute; top:2px; right:2px; width:20px; height:20px; border:0; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:14px; cursor:pointer;">×</button>
-            </div>
-          `).join('') : ''}
-          <button class="add-image-btn" id="editAddImageBtn" title="Add image" style="width:76px; height:76px; border:1px solid #ddd; background:white; border-radius:8px; font-size:24px; color:#7654d8; cursor:pointer;">＋</button>
-        </div>
-        <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between; gap:8px; min-width:0;">
-          <input id="editCaption" class="field" placeholder="Caption (optional)" value="${escapeHTML(note.caption || '')}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px;">
-          <input id="editSource" class="field" placeholder="Source (optional)" value="${escapeHTML(note.source || '')}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px;">
-        </div>
-      </div>
-      
-      <button class="btn primary full" id="saveEditNoteBtn" style="width:100%; padding:12px; background:#7654d8; color:white; border:0; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; margin-top:12px;">Save Changes</button>
+    <div class="popup-header">
+      <strong class="popup-tag ${isGlobal ? 'global' : 'chapter'}">
+        <span>${icon}</span> Edit ${noteLabel}
+      </strong>
+      <button id="closeEditNoteBtn" type="button" class="icon-action-btn" title="Close">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
     </div>
+    <label>Note</label>
+    <textarea id="editNoteContent" class="field" placeholder="Write your note...">${escapeHTML(note.content || '')}</textarea>
+    
+    <label>Illustration</label>
+    <div style="display:flex; gap:10px; align-items:stretch;">
+      <div id="editImageSlots" class="image-slots" style="flex:0 0 auto;"></div>
+      <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between; gap:8px; min-width:0;">
+        <input id="editCaption" class="field" placeholder="Caption (optional)" value="${escapeHTML(note.caption || '')}">
+        <input id="editSource" class="field" placeholder="Source (optional)" value="${escapeHTML(note.source || '')}">
+      </div>
+    </div>
+    
+    <button class="btn primary full" id="saveEditNoteBtn" type="button" style="margin-top:14px;">Save Changes</button>
   `;
 
-  const popup = document.getElementById('notePopup');
-  if (popup._outsideHandler) {
-    document.removeEventListener('click', popup._outsideHandler);
-    delete popup._outsideHandler;
-  }
-  popup.innerHTML = html;
-  popup.style.position = 'fixed';
-  popup.style.zIndex = '1000';
-  popup.style.display = 'block';
-  popup.style.visibility = 'visible';
-  popup.style.left = '50%';
-  popup.style.top = '50%';
-  popup.style.transform = 'translate(-50%, -50%)';
-  popup.classList.add('open');
+  openPopup(html, effectiveAnchor);
 
-  // Hàm render lại danh sách ảnh
-  function renderEditImages(note) {
+  document.getElementById("closeEditNoteBtn")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeNotePopup();
+  });
+
+  function renderEditImages(targetNote) {
     const container = document.getElementById('editImageSlots');
+    if (!container) return;
     container.innerHTML = '';
-    if (note.images && note.images.length > 0) {
-      note.images.forEach(img => {
+    if (targetNote.images && targetNote.images.length > 0) {
+      targetNote.images.forEach(img => {
         const slot = document.createElement('div');
         slot.className = 'image-slot';
-        slot.style.cssText = 'position:relative; width:76px; height:76px; border:1px solid #ddd; border-radius:8px; overflow:hidden;';
         slot.innerHTML = `
-          <img src="${img}" style="width:100%; height:100%; object-fit:cover;">
-          <button class="image-remove" data-image="${img}" style="position:absolute; top:2px; right:2px; width:20px; height:20px; border:0; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:14px; cursor:pointer;">×</button>
+          <img src="${img}">
+          <button class="image-remove" data-image="${img}">×</button>
         `;
         container.appendChild(slot);
       });
@@ -1156,16 +1436,16 @@ function editNote(noteId, type) {
     addBtn.className = 'add-image-btn';
     addBtn.id = 'editAddImageBtn';
     addBtn.textContent = '＋';
-    addBtn.title = 'Add another image';
-    addBtn.style.cssText = 'width:76px; height:76px; border:1px solid #ddd; background:white; border-radius:8px; font-size:24px; color:#7654d8; cursor:pointer;';
+    addBtn.title = 'Add image';
+    addBtn.type = 'button';
     container.appendChild(addBtn);
-    addBtn.addEventListener('click', function() {
-      triggerImageUpload(note, renderEditImages);
+    addBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      triggerImageUpload(targetNote, renderEditImages);
     });
   }
 
-  // Hàm trigger upload ảnh
-  function triggerImageUpload(note, rerender) {
+  function triggerImageUpload(targetNote, rerender) {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
@@ -1174,31 +1454,54 @@ function editNote(noteId, type) {
     fileInput.click();
     fileInput.addEventListener('change', async function(e) {
       const file = e.target.files[0];
-      if (!file) return;
+      if (!file) {
+        if (fileInput.parentNode) document.body.removeChild(fileInput);
+        return;
+      }
       try {
-        const filePath = `notes/${Date.now()}_${file.name}`;
-        const { data, error } = await _supabase.storage
-          .from('reader-images')
-          .upload(filePath, file);
-        if (error) throw error;
-        const { data: urlData } = _supabase.storage.from('reader-images').getPublicUrl(filePath);
-        const imageUrl = urlData.publicUrl;
-        if (!note.images) note.images = [];
-        note.images.push(imageUrl);
-        rerender(note);
-        toast('Đã upload ảnh');
+        if (_supabase) {
+          const filePath = `notes/${Date.now()}_${file.name}`;
+          const { error } = await _supabase.storage
+            .from('reader-images')
+            .upload(filePath, file);
+          if (error) throw error;
+          const { data: urlData } = _supabase.storage.from('reader-images').getPublicUrl(filePath);
+          const imageUrl = urlData.publicUrl;
+          if (!targetNote.images) targetNote.images = [];
+          targetNote.images.push(imageUrl);
+        } else {
+          const reader = new FileReader();
+          reader.onload = (re) => {
+            if (!targetNote.images) targetNote.images = [];
+            targetNote.images.push(re.target.result);
+            rerender(targetNote);
+          };
+          reader.readAsDataURL(file);
+          if (fileInput.parentNode) document.body.removeChild(fileInput);
+          return;
+        }
+        rerender(targetNote);
+        toast('Image uploaded');
       } catch (err) {
         console.error(err);
-        toast('Lỗi upload ảnh: ' + err.message);
+        const reader = new FileReader();
+        reader.onload = (re) => {
+          if (!targetNote.images) targetNote.images = [];
+          targetNote.images.push(re.target.result);
+          rerender(targetNote);
+        };
+        reader.readAsDataURL(file);
       }
-      document.body.removeChild(fileInput);
+      if (fileInput.parentNode) document.body.removeChild(fileInput);
     });
   }
+
   renderEditImages(note);
-  // Xóa ảnh
-document.getElementById('editImageSlots').addEventListener('click', function(e) {
+
+  document.getElementById('editImageSlots')?.addEventListener('click', function(e) {
     const removeBtn = e.target.closest('.image-remove');
     if (!removeBtn) return;
+    e.stopPropagation();
     const imgUrl = removeBtn.dataset.image;
     if (!imgUrl) return;
     if (!note.images) note.images = [];
@@ -1209,8 +1512,8 @@ document.getElementById('editImageSlots').addEventListener('click', function(e) 
     }
   });
 
-  // Lưu thay đổi
-document.getElementById('saveEditNoteBtn').addEventListener('click', async function() {
+  document.getElementById('saveEditNoteBtn')?.addEventListener('click', function(e) {
+    e.stopPropagation();
     const newContent = document.getElementById('editNoteContent').value.trim();
     if (!newContent) {
       toast("Content cannot be empty");
@@ -1220,78 +1523,55 @@ document.getElementById('saveEditNoteBtn').addEventListener('click', async funct
     note.caption = document.getElementById('editCaption').value.trim();
     note.source = document.getElementById('editSource').value.trim();
 
-    try {
-      await _supabase
-        .from('notes')
-        .update({
-          note_text: newContent,
-          caption: note.caption,
-          source: note.source,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', note.id);
-
-      saveState(false);
-      closeNotePopup();
-      renderOverview();
-      if (document.getElementById('readerView').classList.contains('active')) {
-        renderReader();
-      }
-      toast("Note updated!");
-    } catch (err) {
-      console.error(err);
-      toast('Lỗi cập nhật note: ' + err.message);
+    // Optimistic UI update
+    saveState(false);
+    closeNotePopup();
+    renderOverview();
+    if (document.getElementById('readerView')?.classList.contains('active')) {
+      renderReader();
     }
+    toast("Note updated");
+
+    // Background remote update
+    (async () => {
+      try {
+        if (_supabase) {
+          await _supabase
+            .from('notes')
+            .update({
+              note_text: newContent,
+              caption: note.caption,
+              source: note.source,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', note.id);
+        }
+      } catch (err) {
+        console.warn("Background update note error:", err);
+      }
+    })();
   });
 }
-
-// Xuất hàm ra global
-
-
-// ================= POPUP POSITION =================
-function positionPopup(popup, anchor) {
-  const rect = anchor.getBoundingClientRect();
-  popup.style.left = "0px";
-  popup.style.top = "0px";
-  const popupWidth = popup.offsetWidth || 380;
-  const popupHeight = popup.offsetHeight || 300;
-  let left = rect.left + rect.width / 2 - popupWidth / 2;
-  let top = rect.bottom + 10;
-  if (left + popupWidth > window.innerWidth - 15) {
-    left = window.innerWidth - popupWidth - 15;
-  }
-  if (left < 15) {
-    left = 15;
-  }
-  if (top + popupHeight > window.innerHeight - 15) {
-    top = rect.top - popupHeight - 10;
-  }
-  if (top < 15) {
-    top = 15;
-  }
-  popup.style.left = `${left}px`;
-  popup.style.top = `${top}px`;
-  popup.style.transform = 'none';
-}
+window.editNote = editNote;
 
 // ================= EDIT MODE =================
-document.getElementById("toggleEditBtn").addEventListener("click", openEditor);
-document.getElementById("closeEditorBtn").addEventListener("click", closeEditor);
+document.getElementById("toggleEditBtn")?.addEventListener("click", openEditor);
+document.getElementById("closeEditorBtn")?.addEventListener("click", closeEditor);
 function openEditor() {
   const chapter = getChapter();
   if (!chapter) return;
   document.getElementById("chapterTitleInput").value = chapter.title || "";
   document.getElementById("chapterEditor").innerHTML = chapter.content;
-  document.getElementById("editorPanel").classList.add("open");
+  document.getElementById("editorPanel")?.classList.add("open");
   activateEditorAnnotations();
 }
 function closeEditor() {
-  document.getElementById("editorPanel").classList.remove("open");
+  document.getElementById("editorPanel")?.classList.remove("open");
   closeNotePopup();
 }
 
 // ================= SAVE CHAPTER =================
-document.getElementById("saveChapterBtn").addEventListener("click", async () => {
+document.getElementById("saveChapterBtn")?.addEventListener("click", async () => {
   const story = getStory();
   const chapter = getChapter();
   if (!story || !chapter) return;
@@ -1300,21 +1580,23 @@ document.getElementById("saveChapterBtn").addEventListener("click", async () => 
   chapter.content = document.getElementById("chapterEditor").innerHTML;
 
   try {
-    const { data, error } = await _supabase
-      .from('chapters')
-      .upsert({
-        id: chapter.id,
-        story_id: story.id,
-        title: chapter.title,
-        content: chapter.content,
-        chapter_order: chapter.number,
-        updated_at: new Date().toISOString()
-      })
-      .select();
+    if (_supabase) {
+      const { data, error } = await _supabase
+        .from('chapters')
+        .upsert({
+          id: chapter.id,
+          story_id: story.id,
+          title: chapter.title,
+          content: chapter.content,
+          chapter_order: chapter.number,
+          updated_at: new Date().toISOString()
+        })
+        .select();
 
-    if (error) throw error;
-    if (data && data[0]) {
-      chapter.id = data[0].id;
+      if (error) throw error;
+      if (data && data[0]) {
+        chapter.id = data[0].id;
+      }
     }
     saveState(false);
     toast("Chapter saved");
@@ -1322,7 +1604,10 @@ document.getElementById("saveChapterBtn").addEventListener("click", async () => 
     renderChapterList();
   } catch (err) {
     console.error(err);
-    toast('Lỗi lưu chapter: ' + err.message);
+    saveState(false);
+    toast("Chapter saved locally");
+    renderReader();
+    renderChapterList();
   }
 });
 
@@ -1333,10 +1618,11 @@ function activateEditorAnnotations() {
       event.stopPropagation();
       const noteId = el.dataset.noteId;
       const chapter = getChapter();
+      if (!chapter) return;
       const note = chapter.notes.find(n => n.id === noteId);
       if (!note) {
         const story = getStory();
-        const global = story.globalNotes.find(n => n.id === noteId);
+        const global = story?.globalNotes.find(n => n.id === noteId);
         if (global) {
           showNotePopup(global, el);
         }
@@ -1348,8 +1634,8 @@ function activateEditorAnnotations() {
 }
 
 // ================= TEXT SELECTION =================
-document.getElementById("chapterEditor").addEventListener("mouseup", handleTextSelection);
-document.getElementById("chapterEditor").addEventListener("touchend", () => {
+document.getElementById("chapterEditor")?.addEventListener("mouseup", handleTextSelection);
+document.getElementById("chapterEditor")?.addEventListener("touchend", () => {
   setTimeout(handleTextSelection, 100);
 });
 function handleTextSelection() {
@@ -1358,7 +1644,8 @@ function handleTextSelection() {
   const text = selection.toString().trim();
   if (!text) return;
   const range = selection.getRangeAt(0);
-  if (!document.getElementById("chapterEditor").contains(range.commonAncestorContainer)) return;
+  const editor = document.getElementById("chapterEditor");
+  if (!editor || !editor.contains(range.commonAncestorContainer)) return;
   selectedRange = range.cloneRange();
   selectedText = text;
   showCreateNotePopup(range);
@@ -1370,28 +1657,33 @@ function showCreateNotePopup(range) {
   const anchor = { getBoundingClientRect: () => range.getBoundingClientRect() };
 
   const html = `
-    <div style="padding:18px; font-family: Inter, sans-serif; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); max-width: 380px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:10px;">
-        <strong style="font-size:16px; color: #7654d8;">Add Note</strong>
-        <button onclick="closeCreatePopup()" style="border:0; background:transparent; font-size:22px; color:#999; cursor:pointer;">×</button>
-      </div>
-      <div style="background:#f5f0ff; border-radius:8px; padding:10px; margin:8px 0 14px;">
-        <span style="font-size:14px; color:#555;">"${escapeHTML(selectedText)}"</span>
-      </div>
-      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Note Type</label>
-      <div style="display:flex; gap:6px; margin-bottom:12px;">
-        <button class="type-btn active" data-type="chapter" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:8px; background:white; font-size:13px; cursor:pointer; transition:0.2s;">Chapter Note</button>
-        <button class="type-btn" data-type="global" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:8px; background:white; font-size:13px; cursor:pointer; transition:0.2s;">Global Note</button>
-      </div>
-      <button class="btn primary full" id="confirmSelectionBtn" style="width:100%; padding:12px; background:#7654d8; color:white; border:0; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">Confirm</button>
+    <div class="popup-header">
+      <strong class="popup-tag chapter">
+        <span>✨</span> Add Note
+      </strong>
+      <button onclick="closeCreatePopup()" type="button" class="icon-action-btn" title="Close">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
     </div>
+    <div class="popup-selected">
+      <span>"${escapeHTML(selectedText)}"</span>
+    </div>
+    <label>Note Type</label>
+    <div class="note-type-row">
+      <button class="type-btn active" data-type="chapter" type="button">
+        <span class="type-icon">🌙</span><span class="type-label">Chapter Note</span>
+      </button>
+      <button class="type-btn" data-type="global" type="button">
+        <span class="type-icon">🪐</span><span class="type-label">Global Note</span>
+      </button>
+    </div>
+    <button class="btn primary full" id="confirmSelectionBtn" type="button">Confirm</button>
   `;
 
-  // Mở popup bước 1
   openPopup(html, anchor);
   
-  // Gắn sự kiện cho các nút type
   const popup = document.getElementById('notePopup');
+  if (!popup) return;
   popup.querySelectorAll(".type-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       popup.querySelectorAll(".type-btn").forEach(b => b.classList.remove("active"));
@@ -1400,11 +1692,8 @@ function showCreateNotePopup(range) {
     });
   });
   
-  // Gắn sự kiện confirm để mở bước 2
-  popup.querySelector("#confirmSelectionBtn").addEventListener("click", function() {
-    // Đóng popup bước 1
+  popup.querySelector("#confirmSelectionBtn")?.addEventListener("click", function() {
     closePopup();
-    // Mở popup bước 2
     openNoteEditor();
   });
 }
@@ -1417,58 +1706,53 @@ function closeCreatePopup() {
 }
 window.closeCreatePopup = closeCreatePopup;
 
-// ================= NOTE EDITOR (BƯỚC 2: NHẬP NỘI DUNG - CĂN CHỈNH ĐẸP) =================
+// ================= NOTE EDITOR (BƯỚC 2: NHẬP NỘI DUNG) =================
 function openNoteEditor() {
   const isGlobal = pendingNoteType === "global";
   const noteLabel = isGlobal ? "Global Note" : "Chapter Note";
+  const icon = isGlobal ? "🪐" : "🌙";
   
   const html = `
-    <div style="padding:18px; font-family: Inter, sans-serif; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); max-width: 380px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:10px;">
-        <strong style="font-size:16px; color: #7654d8;">${noteLabel}</strong>
-        <button onclick="closeCreatePopup()" style="border:0; background:transparent; font-size:22px; color:#999; cursor:pointer;">×</button>
-      </div>
-      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Note</label>
-      <textarea id="newNoteContent" placeholder="Write your note..." style="width:100%; min-height:100px; border:1px solid #ddd; border-radius:8px; padding:10px; font-family:inherit; font-size:14px; outline:none;"></textarea>
-      
-      <!-- Illustration + Caption + Source căn chỉnh thẳng hàng -->
-      <label style="display:block; font-size:12px; font-weight:700; margin:10px 0 6px;">Illustration</label>
-      <div style="display:flex; gap:12px; align-items:stretch;">
-        <!-- Cột trái: Illustration -->
-        <div id="newImageSlots" class="image-slots" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; align-content:center; flex:0 0 auto;">
-          <button class="add-image-btn" id="firstImageBtn" title="Add image" style="width:76px; height:76px; border:1px solid #ddd; background:white; border-radius:8px; font-size:24px; color:#7654d8; cursor:pointer;">＋</button>
-        </div>
-        <!-- Cột phải: Caption + Source -->
-        <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between; gap:8px; min-width:0;">
-          <input id="newCaption" class="field" placeholder="Caption (optional)" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px;">
-          <input id="newSource" class="field" placeholder="Source (optional)" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px;">
-        </div>
-      </div>
-      
-      <button class="btn primary full" id="saveNewNoteBtn" style="width:100%; padding:12px; background:#7654d8; color:white; border:0; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; margin-top:12px;">Save Note</button>
+    <div class="popup-header">
+      <strong class="popup-tag ${isGlobal ? 'global' : 'chapter'}">
+        <span>${icon}</span> ${noteLabel}
+      </strong>
+      <button onclick="closeCreatePopup()" type="button" class="icon-action-btn" title="Close">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
     </div>
+    <label>Note</label>
+    <textarea id="newNoteContent" class="field" placeholder="Write your note..."></textarea>
+    
+    <label>Illustration</label>
+    <div style="display:flex; gap:10px; align-items:stretch;">
+      <div id="newImageSlots" class="image-slots" style="flex:0 0 auto;">
+        <button class="add-image-btn" id="firstImageBtn" title="Add image" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between; gap:8px; min-width:0;">
+        <input id="newCaption" class="field" placeholder="Caption (optional)">
+        <input id="newSource" class="field" placeholder="Source (optional)">
+      </div>
+    </div>
+    
+    <button class="btn primary full" id="saveNewNoteBtn" type="button" style="margin-top:14px;">Save Note</button>
   `;
   
-  // Mở popup bước 2 với anchor là vị trí của selection
   const anchor = getAnchorFromRange(selectedRange);
-  // Không gắn outside handler cho bước 2 để tránh đóng nhầm
   const popup = document.getElementById('notePopup');
-  // Xóa handler cũ nếu có
+  if (!popup) return;
   if (popup._outsideHandler) {
     document.removeEventListener('click', popup._outsideHandler);
     delete popup._outsideHandler;
   }
   
-  // Hiển thị popup
   popup.innerHTML = html;
   popup.style.position = 'fixed';
   popup.style.zIndex = '1000';
   popup.style.display = 'block';
   popup.style.visibility = 'visible';
-  
-  // Gắn handler đóng bên ngoài nhưng KHÔNG đóng popup bước 2 khi click bên ngoài
-  // Chỉ cho phép đóng bằng nút ×
-  // Để tắt handler cho popup bước 2, ta không gắn handler cho click bên ngoài
   
   if (anchor) {
     positionPopup(popup, anchor);
@@ -1479,9 +1763,8 @@ function openNoteEditor() {
   }
   popup.classList.add('open');
   
-  // Gắn sự kiện cho các nút
-  document.getElementById("firstImageBtn").addEventListener("click", () => addImageSlot());
-  document.getElementById("saveNewNoteBtn").addEventListener("click", saveNewNote);
+  document.getElementById("firstImageBtn")?.addEventListener("click", () => addImageSlot());
+  document.getElementById("saveNewNoteBtn")?.addEventListener("click", saveNewNote);
 }
 
 function getAnchorFromRange(range) {
@@ -1493,6 +1776,7 @@ function getAnchorFromRange(range) {
 // ================= IMAGE SLOT =================
 function addImageSlot() {
   const wrapper = document.getElementById("newImageSlots");
+  if (!wrapper) return;
   const fileInput = document.createElement("input");
   fileInput.type = "file";
   fileInput.accept = "image/*";
@@ -1505,48 +1789,56 @@ function addImageSlot() {
     if (!file) return;
 
     try {
-      const filePath = `notes/${Date.now()}_${file.name}`;
-      const { data, error } = await _supabase.storage
-        .from('reader-images')
-        .upload(filePath, file);
-      if (error) throw error;
+      if (_supabase) {
+        const filePath = `notes/${Date.now()}_${file.name}`;
+        const { error } = await _supabase.storage
+          .from('reader-images')
+          .upload(filePath, file);
+        if (error) throw error;
 
-      const { data: urlData } = _supabase.storage
-        .from('reader-images')
-        .getPublicUrl(filePath);
-      const imageUrl = urlData.publicUrl;
-      pendingImages.push(imageUrl);
+        const { data: urlData } = _supabase.storage
+          .from('reader-images')
+          .getPublicUrl(filePath);
+        const imageUrl = urlData.publicUrl;
+        pendingImages.push(imageUrl);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          pendingImages.push(e.target.result);
+          renderPendingImages();
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
       renderPendingImages();
       toast('Đã upload ảnh');
     } catch (err) {
       console.error(err);
-      toast('Lỗi upload ảnh: ' + err.message);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        pendingImages.push(e.target.result);
+        renderPendingImages();
+      };
+      reader.readAsDataURL(file);
     }
   });
 }
 
 function renderPendingImages() {
   const wrapper = document.getElementById("newImageSlots");
+  if (!wrapper) return;
   wrapper.innerHTML = "";
   pendingImages.forEach((imageUrl, index) => {
     const slot = document.createElement("div");
     slot.className = "image-slot";
-    slot.innerHTML = `<img src="${imageUrl}" style="width:76px; height:76px; object-fit:cover; border-radius:6px;"><button class="image-remove" data-index="${index}" style="position:absolute; top:2px; right:2px; width:20px; height:20px; border:0; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:14px; cursor:pointer;">×</button>`;
-    slot.style.position = "relative";
+    slot.innerHTML = `<img src="${imageUrl}"><button class="image-remove" data-index="${index}">×</button>`;
     wrapper.appendChild(slot);
   });
   const addBtn = document.createElement("button");
   addBtn.className = "add-image-btn";
   addBtn.textContent = "＋";
   addBtn.title = "Add another image";
-  addBtn.style.width = "76px";
-  addBtn.style.height = "76px";
-  addBtn.style.border = "1px solid #ddd";
-  addBtn.style.background = "white";
-  addBtn.style.borderRadius = "8px";
-  addBtn.style.fontSize = "24px";
-  addBtn.style.color = "#7654d8";
-  addBtn.style.cursor = "pointer";
+  addBtn.type = "button";
   addBtn.addEventListener("click", addImageSlot);
   wrapper.appendChild(addBtn);
   wrapper.querySelectorAll(".image-remove").forEach(btn => {
@@ -1577,23 +1869,22 @@ async function saveNewNote() {
   const chapterId = chapter.id;
 
   try {
-    const { data, error } = await _supabase
-      .from('notes')
-      .insert({
-        id: noteId,
-        story_id: story.id,
-        chapter_id: chapterId,
-        type: noteType,
-        selected_text: selectedText,
-        note_text: content,
-        caption: caption,
-        source: imageUrl || source,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select();
-
-    if (error) throw error;
+    if (_supabase) {
+      await _supabase
+        .from('notes')
+        .insert({
+          id: noteId,
+          story_id: story.id,
+          chapter_id: chapterId,
+          type: noteType,
+          selected_text: selectedText,
+          note_text: content,
+          caption: caption,
+          source: imageUrl || source,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+    }
 
     const newNote = {
       id: noteId,
@@ -1621,10 +1912,12 @@ async function saveNewNote() {
     applyAnnotationToSelection(noteId);
     chapter.content = document.getElementById("chapterEditor").innerHTML;
 
-    await _supabase
-      .from('chapters')
-      .update({ content: chapter.content, updated_at: new Date().toISOString() })
-      .eq('id', chapter.id);
+    if (_supabase) {
+      await _supabase
+        .from('chapters')
+        .update({ content: chapter.content, updated_at: new Date().toISOString() })
+        .eq('id', chapter.id);
+    }
 
     saveState(false);
     toast("Note saved");
@@ -1637,7 +1930,15 @@ async function saveNewNote() {
     activateEditorAnnotations();
   } catch (err) {
     console.error(err);
-    toast('Lỗi lưu note: ' + err.message);
+    saveState(false);
+    toast("Note saved locally");
+    closeNotePopup();
+    selectedRange = null;
+    selectedText = "";
+    pendingImages = [];
+    renderReader();
+    openEditor();
+    activateEditorAnnotations();
   }
 }
 
@@ -1654,27 +1955,28 @@ function applyAnnotationToSelection(noteId) {
     span.appendChild(contents);
     selectedRange.insertNode(span);
     const selection = window.getSelection();
-    selection.removeAllRanges();
+    selection?.removeAllRanges();
   } catch (error) {
     console.error("Could not annotate selection", error);
   }
 }
 
 // ================= NAVIGATION =================
-document.getElementById("readerBackBtn").addEventListener("click", () => {
+document.getElementById("readerBackBtn")?.addEventListener("click", () => {
   closeEditor();
   showView("storyView");
   renderStory();
   saveNavigationState();
 });
-document.getElementById("chapterBackBtn").addEventListener("click", () => {
+document.getElementById("chapterBackBtn")?.addEventListener("click", () => {
   goPreviousChapter();
 });
-document.getElementById("chapterContinueBtn").addEventListener("click", () => {
+document.getElementById("chapterContinueBtn")?.addEventListener("click", () => {
   goNextChapter();
 });
 function goPreviousChapter() {
   const story = getStory();
+  if (!story) return;
   const index = story.chapters.findIndex(c => c.id === currentChapterId);
   if (index <= 0) {
     showView("storyView");
@@ -1686,6 +1988,7 @@ function goPreviousChapter() {
 }
 function goNextChapter() {
   const story = getStory();
+  if (!story) return;
   const index = story.chapters.findIndex(c => c.id === currentChapterId);
   if (index === story.chapters.length - 1) {
     toast("You have reached the end of this story.");
@@ -1695,21 +1998,22 @@ function goNextChapter() {
 }
 
 // ================= TOP NAVIGATION =================
-document.getElementById("topChapterBackBtn").addEventListener("click", () => {
+document.getElementById("topChapterBackBtn")?.addEventListener("click", () => {
   goPreviousChapter();
 });
-document.getElementById("topChapterContinueBtn").addEventListener("click", () => {
+document.getElementById("topChapterContinueBtn")?.addEventListener("click", () => {
   goNextChapter();
 });
-document.getElementById("topChapterListBtn").addEventListener("click", () => {
+document.getElementById("topChapterListBtn")?.addEventListener("click", () => {
   openChapterDrawer();
 });
 
 // ================= CHAPTER DRAWER =================
-document.getElementById("chapterListBtn").addEventListener("click", openChapterDrawer);
+document.getElementById("chapterListBtn")?.addEventListener("click", openChapterDrawer);
 function openChapterDrawer() {
   const story = getStory();
   const list = document.getElementById("drawerChapterList");
+  if (!story || !list) return;
   list.innerHTML = "";
   story.chapters.forEach(chapter => {
     const item = document.createElement("div");
@@ -1721,29 +2025,29 @@ function openChapterDrawer() {
     });
     list.appendChild(item);
   });
-  document.getElementById("chapterDrawer").classList.add("open");
+  document.getElementById("chapterDrawer")?.classList.add("open");
 }
 function closeChapterDrawer() {
-  document.getElementById("chapterDrawer").classList.remove("open");
+  document.getElementById("chapterDrawer")?.classList.remove("open");
 }
-document.getElementById("closeDrawerBtn").addEventListener("click", closeChapterDrawer);
-document.getElementById("chapterDrawer").addEventListener("click", event => {
+document.getElementById("closeDrawerBtn")?.addEventListener("click", closeChapterDrawer);
+document.getElementById("chapterDrawer")?.addEventListener("click", event => {
   if (event.target.id === "chapterDrawer") {
     closeChapterDrawer();
   }
 });
 
 // ================= LIBRARY NAV =================
-document.getElementById("backLibraryBtn").addEventListener("click", () => {
+document.getElementById("backLibraryBtn")?.addEventListener("click", () => {
   renderLibrary();
   showView("libraryView");
   saveNavigationState();
 });
 
 // ================= OVERVIEW =================
-document.getElementById("overviewBtn").addEventListener("click", openOverview);
-document.getElementById("storyOverviewBtn").addEventListener("click", openOverview);
-document.getElementById("overviewBackBtn").addEventListener("click", () => {
+document.getElementById("overviewBtn")?.addEventListener("click", openOverview);
+document.getElementById("storyOverviewBtn")?.addEventListener("click", openOverview);
+document.getElementById("overviewBackBtn")?.addEventListener("click", () => {
   if (currentChapterId) {
     renderReader();
     showView("readerView");
@@ -1766,13 +2070,15 @@ function renderOverview() {
   if (!story) return;
   renderGlobalNotes();
   renderChapterNotes();
-  document.getElementById("searchResults").innerHTML = "";
+  const searchResultsEl = document.getElementById("searchResults");
+  if (searchResultsEl) searchResultsEl.innerHTML = "";
 }
 
 // ================= RENDER GLOBAL NOTES =================
 function renderGlobalNotes() {
   const story = getStory();
   const list = document.getElementById("globalNotesList");
+  if (!list || !story) return;
   list.innerHTML = "";
 
   if (!story.globalNotes.length) {
@@ -1784,6 +2090,7 @@ function renderGlobalNotes() {
     const item = document.createElement("div");
     item.className = "note-list-item";
     item.dataset.noteIndex = index;
+    item.dataset.noteId = note.id;
     item.dataset.noteType = "global";
 
     const hasImage = note.images && note.images.length > 0;
@@ -1799,25 +2106,40 @@ function renderGlobalNotes() {
     item.addEventListener("click", (e) => {
       if (e.target.closest(".delete-note-btn")) return;
 
-      // Nếu global note có chapterId, mở chapter đó và highlight từ
+      const targetTerm = (note.selectedText || note.title || '').trim();
+
       if (note.chapterId) {
         const chapter = story.chapters.find(c => c.id === note.chapterId);
         if (chapter) {
-          openChapter(chapter.id, null, note.selectedText); // truyền từ khóa để highlight
+          openChapter(chapter.id, note.id, targetTerm);
           return;
         }
       }
 
-      // Nếu không có chapterId, hiện popup như cũ
+      if (targetTerm) {
+        for (const ch of story.chapters) {
+          if (ch.content && (ch.content.includes(`data-note-id="${note.id}"`) || ch.content.toLowerCase().includes(targetTerm.toLowerCase()))) {
+            openChapter(ch.id, note.id, targetTerm);
+            return;
+          }
+        }
+      }
+
       showNotePopup(note, item);
     });
 
     list.appendChild(item);
   });
-}
-// ================= RENDER CHAPTER NOTES (DANH SÁCH PHẲNG) =================
-///
 
+  list.querySelectorAll('.delete-note-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      deleteNoteFromOverview(this);
+    });
+  });
+}
+
+// ================= RENDER CHAPTER NOTES =================
 function renderChapterNotes() {
   const story = getStory();
   const list = document.getElementById("chapterNotesList");
@@ -1843,7 +2165,6 @@ function renderChapterNotes() {
     return;
   }
 
-  // Sắp xếp theo thời gian tạo: mới nhất lên đầu
   allNotes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   let html = '';
@@ -1863,7 +2184,6 @@ function renderChapterNotes() {
 
   list.innerHTML = html;
 
-  // Sự kiện xóa
   list.querySelectorAll('.delete-note-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -1871,7 +2191,6 @@ function renderChapterNotes() {
     });
   });
 
-  // Sự kiện click mở chapter (truyền noteId)
   list.querySelectorAll('.note-list-item').forEach(item => {
     item.addEventListener('click', function(e) {
       if (e.target.closest('.delete-note-btn')) return;
@@ -1883,6 +2202,7 @@ function renderChapterNotes() {
     });
   });
 }
+
 // ================= REMOVE ANNOTATION =================
 function removeAnnotationFromContent(noteId, chapterId) {
   const story = getStory();
@@ -1904,6 +2224,94 @@ function removeAnnotationFromContent(noteId, chapterId) {
 }
 
 // ================= DELETE NOTE =================
+async function deleteNote(noteId, type = "chapter") {
+  const story = getStory();
+  if (!story) return;
+  
+  let noteTitle = "";
+  let chapterId = null;
+  let targetNote = null;
+  
+  if (type === "global") {
+    targetNote = story.globalNotes.find(n => n.id === noteId);
+    if (!targetNote) return;
+    noteTitle = targetNote.title || targetNote.selectedText || "Global Note";
+    chapterId = targetNote.chapterId;
+  } else {
+    for (const ch of story.chapters) {
+      const found = ch.notes.find(n => n.id === noteId);
+      if (found) {
+        targetNote = found;
+        chapterId = ch.id;
+        noteTitle = found.selectedText || found.content || "Chapter Note";
+        break;
+      }
+    }
+    if (!targetNote) return;
+  }
+
+  const ok = await showConfirmDialog({
+    title: "Delete Note",
+    message: `Are you sure you want to delete this note ("${noteTitle}")?`,
+    confirmText: "Delete Note",
+    cancelText: "Cancel",
+    danger: true
+  });
+  if (!ok) return;
+
+  closeNotePopup();
+
+  // Optimistic UI update immediately
+  const noteCopy = { ...targetNote };
+  if (type === "global") {
+    story.globalNotes = story.globalNotes.filter(n => n.id !== noteId);
+    story.chapters.forEach(ch => {
+      removeAnnotationFromContent(noteId, ch.id);
+    });
+  } else {
+    const ch = story.chapters.find(c => c.id === chapterId);
+    if (ch) {
+      ch.notes = ch.notes.filter(n => n.id !== noteId);
+      removeAnnotationFromContent(noteId, chapterId);
+    }
+  }
+
+  saveState(false);
+  renderOverview();
+  if (document.getElementById('readerView')?.classList.contains('active')) {
+    renderReader();
+  }
+  toast(`Note deleted`);
+
+  // Background remote cleanup
+  (async () => {
+    try {
+      if (noteCopy.source) {
+        await deleteImageFromStorage(noteCopy.source);
+      }
+      if (noteCopy.images && Array.isArray(noteCopy.images)) {
+        for (const img of noteCopy.images) {
+          await deleteImageFromStorage(img);
+        }
+      }
+      if (_supabase) {
+        if (chapterId) {
+          const ch = story.chapters.find(c => c.id === chapterId);
+          if (ch) {
+            await _supabase
+              .from('chapters')
+              .update({ content: ch.content, updated_at: new Date().toISOString() })
+              .eq('id', chapterId);
+          }
+        }
+        await _supabase.from('notes').delete().eq('id', noteId);
+      }
+    } catch (err) {
+      console.warn("Supabase delete note error:", err);
+    }
+  })();
+}
+
 async function deleteNoteFromOverview(target) {
   const item = target.closest(".note-list-item");
   if (!item) return;
@@ -1912,174 +2320,43 @@ async function deleteNoteFromOverview(target) {
   if (!story) return;
 
   if (type === "global") {
+    const noteId = item.dataset.noteId;
+    if (noteId) {
+      deleteNote(noteId, "global");
+      return;
+    }
     const index = parseInt(item.dataset.noteIndex, 10);
     if (isNaN(index)) return;
     const note = story.globalNotes[index];
     if (!note) return;
-    if (!confirm(`Xóa global note "${note.title}"?`)) return;
-
-    const noteCopy = { ...note };
-
-    story.globalNotes.splice(index, 1);
-    renderOverview();
-
-    const chapterId = noteCopy.chapterId;
-    if (chapterId) {
-      const chapter = story.chapters.find(c => c.id === chapterId);
-      if (chapter) {
-        removeAnnotationFromContent(noteCopy.id, chapterId);
-        try {
-          const { error: updateChapErr } = await _supabase
-            .from('chapters')
-            .update({
-              content: chapter.content,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', chapterId);
-          if (updateChapErr) throw updateChapErr;
-        } catch (updateErr) {
-          console.error('Không thể cập nhật chapter content:', updateErr);
-          alert('Lỗi cập nhật nội dung, vui lòng thử lại!');
-          await loadFromSupabase();
-          renderOverview();
-          if (currentChapterId) {
-            renderReader();
-            showView("readerView");
-          } else {
-            renderStory();
-            showView("storyView");
-          }
-          return;
-        }
-      }
-    }
-
-    try {
-      if (noteCopy.source) {
-        await deleteImageFromStorage(noteCopy.source);
-      }
-    } catch (imgErr) {
-      console.warn('Lỗi xóa ảnh global note:', imgErr);
-    }
-
-    try {
-      const { error } = await _supabase
-        .from('notes')
-        .delete()
-        .eq('id', noteCopy.id);
-      if (error) throw error;
-      toast("Đã xóa global note");
-      if (document.getElementById('readerView').classList.contains('active')) {
-        renderReader();
-      }
-    } catch (err) {
-      console.error('Lỗi xóa global note:', err);
-      alert("Xóa thất bại, vui lòng thử lại!");
-      await loadFromSupabase();
-      renderOverview();
-      if (currentChapterId) {
-        renderReader();
-        showView("readerView");
-      } else {
-        renderStory();
-        showView("storyView");
-      }
-    }
-
-   } else if (type === "chapter") {
-    const chapterId = item.dataset.chapterId;
-    const noteId = item.dataset.noteId;            // lấy noteId thay vì noteIndex
-    if (!chapterId || !noteId) return;
-    const chapter = story.chapters.find(c => c.id === chapterId);
-    if (!chapter) return;
-    const noteIndex = chapter.notes.findIndex(n => n.id === noteId); // tìm index theo id
-    if (noteIndex === -1) return;
-    const note = chapter.notes[noteIndex];
-    if (!note) return;
-    if (!confirm(`Xóa chapter note "${note.selectedText}"?`)) return;
-
-    const noteCopy = { ...note };
-
-    chapter.notes.splice(noteIndex, 1);
-    removeAnnotationFromContent(noteCopy.id, chapterId);
-    renderOverview();
-    if (document.getElementById('readerView').classList.contains('active')) {
-      renderReader();
-    }
-
-    try {
-      const { error: updateChapErr } = await _supabase
-        .from('chapters')
-        .update({
-          content: chapter.content,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', chapterId);
-      if (updateChapErr) throw updateChapErr;
-    } catch (updateErr) {
-      console.error('Không thể cập nhật chapter content:', updateErr);
-      alert('Lỗi cập nhật nội dung, vui lòng thử lại!');
-      await loadFromSupabase();
-      if (currentChapterId) {
-        renderReader();
-        showView("readerView");
-      } else {
-        renderStory();
-        showView("storyView");
-      }
-      return;
-    }
-
-    try {
-      if (noteCopy.source) {
-        await deleteImageFromStorage(noteCopy.source);
-      }
-      const { error } = await _supabase.from('notes').delete().eq('id', noteCopy.id);
-      if (error) throw error;
-      toast("Đã xóa chapter note");
-    } catch (err) {
-      console.error(err);
-      alert("Xóa thất bại, vui lòng thử lại!");
-      await loadFromSupabase();
-      if (currentChapterId) {
-        renderReader();
-        showView("readerView");
-      } else {
-        renderStory();
-        showView("storyView");
-      }
-    }
+    deleteNote(note.id, "global");
+  } else if (type === "chapter") {
+    const noteId = item.dataset.noteId;
+    if (!noteId) return;
+    deleteNote(noteId, "chapter");
   }
 }
 
 // ================= DELETE IMAGE FROM STORAGE =================
 async function deleteImageFromStorage(imageUrl) {
-  if (!imageUrl || !imageUrl.includes('reader-images')) return;
+  if (!imageUrl || !imageUrl.includes('reader-images') || !_supabase) return;
   const filePath = imageUrl.split('/reader-images/')[1];
   if (!filePath) return;
   try {
     await _supabase.storage.from('reader-images').remove([filePath]);
-    console.log('Đã xóa ảnh:', filePath);
   } catch (err) {
-    console.warn('Không thể xóa ảnh:', err);
+    console.warn('Cannot delete image from storage:', err);
   }
 }
 
-// Sự kiện click nút xóa note
-document.addEventListener("click", function(e) {
-  const deleteBtn = e.target.closest(".delete-note-btn");
-  if (!deleteBtn) return;
-  e.stopPropagation();
-  deleteNoteFromOverview(deleteBtn);
-});
-
 // ================= SEARCH =================
-document.getElementById("noteSearch").addEventListener("input", event => {
+document.getElementById("noteSearch")?.addEventListener("input", event => {
   searchNotes(event.target.value);
 });
 function searchNotes(query) {
   const story = getStory();
   const container = document.getElementById("searchResults");
+  if (!container || !story) return;
   container.innerHTML = "";
   query = query.trim();
   if (!query) return;
@@ -2087,21 +2364,19 @@ function searchNotes(query) {
   const results = [];
 
   if (searchMode === 'chapter') {
-    //  Chế độ tìm theo số chương
     const chapterNumber = parseInt(query, 10);
     if (isNaN(chapterNumber) || chapterNumber <= 0) {
-      container.innerHTML = `<p class="muted">Vui lòng nhập số chương hợp lệ (1, 2, 3...).</p>`;
+      container.innerHTML = `<p class="muted">Please enter a valid chapter number (e.g. 1, 2, 3...).</p>`;
       return;
     }
     const targetChapter = story.chapters.find(c => c.number === chapterNumber);
     if (!targetChapter) {
-      container.innerHTML = `<p class="muted">Không tìm thấy chương số ${chapterNumber}.</p>`;
+      container.innerHTML = `<p class="muted">Chapter ${chapterNumber} not found.</p>`;
       return;
     }
-    // Hiển thị tiêu đề chương
 
     if (targetChapter.notes.length === 0) {
-      container.innerHTML += `<p class="muted">Chương này chưa có note nào.</p>`;
+      container.innerHTML = `<p class="muted">No notes in this chapter.</p>`;
       return;
     }
 
@@ -2110,24 +2385,36 @@ function searchNotes(query) {
         source: `Chapter ${targetChapter.number} · Chapter Note`,
         title: note.selectedText,
         content: note.content,
-        action: () => openChapter(targetChapter.id, note.id)
+        action: () => openChapter(targetChapter.id, note.id, note.selectedText)
       });
     });
   } else {
-    // 📄 Chế độ tìm theo nội dung (mặc định)
-    // Tìm trong global notes
     story.globalNotes.forEach(note => {
       const searchable = [note.title, note.content, ...(note.keywords || [])].join(" ").toLowerCase();
       if (searchable.includes(query.toLowerCase())) {
+        const targetTerm = (note.selectedText || note.title || '').trim();
+        let targetChapter = null;
+        if (note.chapterId) {
+          targetChapter = story.chapters.find(c => c.id === note.chapterId);
+        }
+        if (!targetChapter && targetTerm) {
+          targetChapter = story.chapters.find(c => c.content && (c.content.includes(`data-note-id="${note.id}"`) || c.content.toLowerCase().includes(targetTerm.toLowerCase())));
+        }
+
         results.push({
-          source: "Global Note",
-          title: note.title,
+          source: targetChapter ? `Chapter ${targetChapter.number} · Global Note` : "Global Note",
+          title: note.title || note.selectedText,
           content: note.content,
-          action: () => showNotePopup(note, document.getElementById("noteSearch"))
+          action: () => {
+            if (targetChapter) {
+              openChapter(targetChapter.id, note.id, targetTerm);
+            } else {
+              showNotePopup(note, document.getElementById("noteSearch"));
+            }
+          }
         });
       }
     });
-    // Tìm trong chapter notes
     story.chapters.forEach(chapter => {
       chapter.notes.forEach(note => {
         const searchable = [note.selectedText, note.content].join(" ").toLowerCase();
@@ -2136,7 +2423,7 @@ function searchNotes(query) {
             source: `Chapter ${chapter.number} · Chapter Note`,
             title: note.selectedText,
             content: note.content,
-            action: () => openChapter(chapter.id, note.id)
+            action: () => openChapter(chapter.id, note.id, note.selectedText)
           });
         }
       });
@@ -2144,7 +2431,7 @@ function searchNotes(query) {
   }
 
   if (!results.length) {
-    container.innerHTML = `<p class="muted">Không tìm thấy kết quả.</p>`;
+    container.innerHTML = `<p class="muted">No results found.</p>`;
     return;
   }
 
@@ -2160,13 +2447,88 @@ function searchNotes(query) {
     container.appendChild(item);
   });
 }
+
+// ================= CUSTOM PROMPT MODAL =================
+function showPromptDialog({ title = "Add Global Note", fields = [] }) {
+  return new Promise(resolve => {
+    let modal = document.getElementById("customPromptModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "customPromptModal";
+      modal.className = "custom-modal-overlay";
+      document.body.appendChild(modal);
+    }
+
+    const fieldsHtml = fields.map((f, i) => `
+      <div style="margin-bottom: 12px;">
+        <label style="display:block; font-size:12px; font-weight:700; color:var(--text); margin-bottom:4px;">${escapeHTML(f.label)}</label>
+        ${f.type === 'textarea'
+          ? `<textarea id="prompt_field_${i}" class="field" style="min-height:80px; font-family:inherit; font-size:14px;" placeholder="${escapeHTML(f.placeholder || '')}">${escapeHTML(f.value || '')}</textarea>`
+          : `<input id="prompt_field_${i}" class="field" type="text" style="font-family:inherit; font-size:14px;" placeholder="${escapeHTML(f.placeholder || '')}" value="${escapeHTML(f.value || '')}">`
+        }
+      </div>
+    `).join('');
+
+    modal.innerHTML = `
+      <div class="custom-modal-dialog">
+        <div class="custom-modal-header">
+          <h3>${escapeHTML(title)}</h3>
+          <button class="custom-modal-close" id="promptCloseBtn" type="button">×</button>
+        </div>
+        <div class="custom-modal-body">
+          ${fieldsHtml}
+        </div>
+        <div class="custom-modal-footer">
+          <button class="btn ghost" id="promptCancelBtn" type="button">Cancel</button>
+          <button class="btn primary" id="promptSubmitBtn" type="button">Save Note</button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.add("active");
+
+    const cleanup = (values) => {
+      modal.classList.remove("active");
+      resolve(values);
+    };
+
+    document.getElementById("promptCloseBtn")?.addEventListener("click", () => cleanup(null));
+    document.getElementById("promptCancelBtn")?.addEventListener("click", () => cleanup(null));
+    document.getElementById("promptSubmitBtn")?.addEventListener("click", () => {
+      const results = {};
+      fields.forEach((f, i) => {
+        const el = document.getElementById(`prompt_field_${i}`);
+        results[f.name] = el ? el.value.trim() : '';
+      });
+      cleanup(results);
+    });
+
+    modal.onclick = (e) => {
+      if (e.target === modal) cleanup(null);
+    };
+  });
+}
+
 // ================= ADD GLOBAL NOTE =================
-document.getElementById("addGlobalNoteBtn").addEventListener("click", async () => {
+document.getElementById("addGlobalNoteBtn")?.addEventListener("click", async () => {
   const story = getStory();
-  const title = prompt("Global Note title:");
-  if (!title) return;
-  const content = prompt("Global Note content:") || "";
-  const category = prompt("Category: Character / Place / Concept / Term / Other", "Character") || "Other";
+  if (!story) return;
+
+  const result = await showPromptDialog({
+    title: "New Global Note",
+    fields: [
+      { name: "title", label: "Title / Term", placeholder: "e.g., Character name, place, concept..." },
+      { name: "content", label: "Note Content", type: "textarea", placeholder: "Detailed description..." },
+      { name: "category", label: "Category", placeholder: "Character / Place / Concept / Term / Other", value: "Character" }
+    ]
+  });
+
+  if (!result || !result.title) return;
+
+  const title = result.title;
+  const content = result.content || "";
+  const category = result.category || "Other";
+
   const note = {
     id: uid(),
     type: "global",
@@ -2183,34 +2545,38 @@ document.getElementById("addGlobalNoteBtn").addEventListener("click", async () =
   };
   story.globalNotes.push(note);
 
-  try {
-    await _supabase
-      .from('notes')
-      .insert({
-        id: note.id,
-        story_id: story.id,
-        chapter_id: null,
-        type: 'global',
-        selected_text: title,
-        note_text: content,
-        caption: '',
-        source: '',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+  // Optimistic UI update
+  saveState(false);
+  renderOverview();
+  toast("Global note added");
 
-    saveState(false);
-    renderOverview();
-    toast("Global note added");
-  } catch (err) {
-    console.error(err);
-    story.globalNotes = story.globalNotes.filter(n => n.id !== note.id);
-    toast('Lỗi thêm global note: ' + err.message);
-  }
+  // Background remote save
+  (async () => {
+    try {
+      if (_supabase) {
+        await _supabase
+          .from('notes')
+          .insert({
+            id: note.id,
+            story_id: story.id,
+            chapter_id: null,
+            type: 'global',
+            selected_text: title,
+            note_text: content,
+            caption: '',
+            source: '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+      }
+    } catch (err) {
+      console.warn("Supabase insert note error:", err);
+    }
+  })();
 });
 
 // ================= EXPORT =================
-document.getElementById("exportBtn").addEventListener("click", exportData);
+document.getElementById("exportBtn")?.addEventListener("click", exportData);
 function exportData() {
   const data = JSON.stringify(state, null, 2);
   const blob = new Blob([data], { type: "application/json" });
@@ -2224,20 +2590,26 @@ function exportData() {
 }
 
 // ================= IMPORT =================
-document.getElementById("importBtn").addEventListener("click", () => {
-  document.getElementById("importInput").click();
+document.getElementById("importBtn")?.addEventListener("click", () => {
+  document.getElementById("importInput")?.click();
 });
-document.getElementById("importInput").addEventListener("change", event => {
+document.getElementById("importInput")?.addEventListener("change", async (event) => {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try {
       const imported = JSON.parse(reader.result);
       if (!imported || !Array.isArray(imported.stories)) {
         throw new Error("Invalid data");
       }
-      const ok = confirm("Import this backup and replace current data?");
+      const ok = await showConfirmDialog({
+        title: "Restore Backup",
+        message: "Are you sure you want to restore this backup? Current library data will be replaced.",
+        confirmText: "Restore",
+        cancelText: "Cancel",
+        danger: false
+      });
       if (!ok) return;
       state = imported;
       saveState(false);
@@ -2245,29 +2617,20 @@ document.getElementById("importInput").addEventListener("change", event => {
       currentChapterId = null;
       renderLibrary();
       showView("libraryView");
-      toast("Backup imported");
+      toast("Library restored from backup");
     } catch (error) {
-      alert("Invalid JSON backup.");
+      toast("Invalid backup file.");
     }
   };
   reader.readAsText(file);
 });
 
-// ================= IMAGE READER (cũ) =================
-function readImage(file, callback) {
-  const reader = new FileReader();
-  reader.onload = event => {
-    callback(event.target.result);
-  };
-  reader.readAsDataURL(file);
-}
-
 // ================= CLOSE POPUP =================
 document.getElementById("closePopupBtn")?.addEventListener("click", closeNotePopup);
 
 // ================= STORY EDIT =================
-document.getElementById("storyEditBtn").addEventListener("click", () => {
-  document.getElementById("storyTitleInput").focus();
+document.getElementById("storyEditBtn")?.addEventListener("click", () => {
+  document.getElementById("storyTitleInput")?.focus();
 });
 
 // ================= ESC =================
@@ -2277,7 +2640,6 @@ document.addEventListener("keydown", event => {
     closeChapterDrawer();
   }
 });
-
 
 function smoothScrollTo(element, duration = 350) {
   const targetPosition = element.getBoundingClientRect().top + window.pageYOffset - window.innerHeight / 2 + element.offsetHeight / 2;
@@ -2289,7 +2651,6 @@ function smoothScrollTo(element, duration = 350) {
     if (startTime === null) startTime = currentTime;
     const timeElapsed = currentTime - startTime;
     const progress = Math.min(timeElapsed / duration, 1);
-    // Hàm easing easeOutCubic để chuyển động mượt, bớt giật
     const ease = 1 - Math.pow(1 - progress, 3);
     window.scrollTo(0, startPosition + distance * ease);
     if (timeElapsed < duration) {
@@ -2299,36 +2660,39 @@ function smoothScrollTo(element, duration = 350) {
   requestAnimationFrame(animation);
 }
 
+// ===== SEARCH MODE TOGGLE =====
+document.getElementById('searchModeBtn')?.addEventListener('click', function() {
+  if (searchMode === 'content') {
+    searchMode = 'chapter';
+    this.textContent = 'Content';
+    this.classList.add('active');
+    const input = document.getElementById('noteSearch');
+    if (input) input.placeholder = 'Enter chapter number (e.g. 12)';
+  } else {
+    searchMode = 'content';
+    this.textContent = 'Chapter';
+    this.classList.remove('active');
+    const input = document.getElementById('noteSearch');
+    if (input) input.placeholder = 'Search notes, terms, characters...';
+  }
+  const query = document.getElementById('noteSearch')?.value;
+  if (query && query.trim()) searchNotes(query);
+});
+
+// ===== THEME SWITCH EVENT LISTENERS =====
+document.querySelectorAll(".theme-toggle").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleTheme();
+  });
+});
 
 // ================= BOOT =================
 (async function boot() {
   try {
+    applyTheme(currentTheme, false);
     await initApp();
   } catch (err) {
     console.error('Boot error:', err);
   }
 })();
-
-// ===== SEARCH MODE TOGGLE =====
-document.getElementById('searchModeBtn').addEventListener('click', function() {
-  if (searchMode === 'content') {
-    searchMode = 'chapter';
-    this.textContent = 'Content';
-    this.classList.add('active');
-    document.getElementById('noteSearch').placeholder = 'Enter chapter number (e.g. 12)';
-  } else {
-    searchMode = 'content';
-    this.textContent = 'Chapter';
-    this.classList.remove('active');
-    document.getElementById('noteSearch').placeholder = 'Search notes, terms, characters...';
-  }
-  const query = document.getElementById('noteSearch').value;
-  if (query.trim()) searchNotes(query);
-});
-
-function highlightText(text, query) {
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  return text.replace(regex, '<mark>$1</mark>');
-}
-// ================= KHÔNG GỌI startProgress() Ở ĐÂY =================
-// Đã được gọi bên trong initApp()
