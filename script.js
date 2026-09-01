@@ -17,12 +17,14 @@ if (window.supabase && typeof window.supabase.createClient === 'function') {
 async function autoLogin() {
   if (!_supabase) return;
   try {
-    await _supabase.auth.signInWithPassword({
+    const loginPromise = _supabase.auth.signInWithPassword({
       email: 'lanvy1859@gmail.com',
       password: 'lanvy1402'
     });
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Login timeout')), 3000));
+    await Promise.race([loginPromise, timeoutPromise]);
   } catch (err) {
-    console.warn('AutoLogin err:', err);
+    console.warn('AutoLogin skipped or offline:', err?.message || err);
   }
 }
 autoLogin();
@@ -46,19 +48,19 @@ function applyTheme(theme, save = true) {
 
 function updateThemeToggleUI() {
   const isDark = currentTheme === "dark";
-  const labelText = isDark ? "Night" : "Day";
+  const labelText = isDark ? "Dark" : "Light";
   const buttons = document.querySelectorAll(".theme-toggle");
   buttons.forEach(btn => {
     const label = btn.querySelector(".theme-toggle-label");
     if (label) label.textContent = labelText;
-    btn.setAttribute("title", isDark ? "Switch to Day mode" : "Switch to Night mode");
+    btn.setAttribute("title", isDark ? "Switch to Light mode" : "Switch to Dark mode");
   });
 }
 
 function toggleTheme() {
   const newTheme = currentTheme === "dark" ? "light" : "dark";
   applyTheme(newTheme, true);
-  toast(`Switched to ${newTheme === "dark" ? "Night" : "Day"} mode`);
+  toast(`Switched to ${newTheme === "dark" ? "Dark" : "Light"} mode`);
 }
 
 let state = { stories: [] };
@@ -370,26 +372,55 @@ function loadState() {
 // ================= LOAD FROM SUPABASE =================
 async function loadFromSupabase() {
   try {
-    const { data: stories, error: storyErr } = await _supabase
-      .from('stories')
-      .select('*')
-      .order('created_at', { ascending: true });
+    const fetchWithTimeout = async (promise, ms = 3000) => {
+      let timer;
+      const timeoutPromise = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error("Supabase request timed out")), ms);
+      });
+      try {
+        return await Promise.race([promise, timeoutPromise]);
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+
+    const storiesRes = await fetchWithTimeout(
+      _supabase
+        .from('stories')
+        .select('*')
+        .order('created_at', { ascending: true })
+    );
+    const stories = storiesRes?.data;
+    const storyErr = storiesRes?.error;
     if (storyErr) throw storyErr;
 
-    const { data: chapters, error: chapErr } = await _supabase
-      .from('chapters')
-      .select('*')
-      .order('chapter_order', { ascending: true });
+    const chaptersRes = await fetchWithTimeout(
+      _supabase
+        .from('chapters')
+        .select('*')
+        .order('chapter_order', { ascending: true })
+    );
+    const chapters = chaptersRes?.data;
+    const chapErr = chaptersRes?.error;
     if (chapErr) throw chapErr;
 
-    const { data: notes, error: noteErr } = await _supabase
-      .from('notes')
-      .select('*')
-      .order('created_at', { ascending: true });
+    const notesRes = await fetchWithTimeout(
+      _supabase
+        .from('notes')
+        .select('*')
+        .order('created_at', { ascending: true })
+    );
+    const notes = notesRes?.data;
+    const noteErr = notesRes?.error;
     if (noteErr) throw noteErr;
 
     if (!stories || stories.length === 0) {
-      state.stories = [];
+      const localState = loadState();
+      if (localState.stories && localState.stories.length) {
+        state = localState;
+      } else {
+        state.stories = [];
+      }
       return;
     }
 
@@ -447,14 +478,12 @@ async function loadFromSupabase() {
     });
 
     saveState(false);
-    toast('Dữ liệu đã tải từ Supabase');
   } catch (error) {
-    console.error('Lỗi tải dữ liệu:', error);
+    console.warn('Lưu trữ đám mây tạm thời không khả dụng, sử dụng bộ nhớ cục bộ:', error?.message || error);
     state = loadState();
     if (!state.stories || !state.stories.length) {
       state.stories = [createDemoStory()];
     }
-    renderLibrary();
   }
 }
 
