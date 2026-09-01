@@ -8,7 +8,7 @@
   <meta property="og:title" content="MemoReader" />
   <meta property="og:description" content="MemoReader - Your personal annotated reading library." />
   <meta property="og:type" content="website" />
-  <link rel="icon" type="image/svg+xml" href="./cat11.svg" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%237654d8'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>" />
   <link rel="stylesheet" href="/style.css">
   <!-- ===== Lottie Player ===== -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -37,7 +37,9 @@
      style="position:fixed; top:0; left:0; height:4px; 
             background: linear-gradient(90deg, #c4b5fd, #8b5cf6); 
             width:0%; z-index:9999; transition: width 0.1s ease;">
-      </div><!-- ================= LIBRARY ================= -->
+      </div>
+      
+      <!-- ================= LIBRARY ================= -->
       <section id="libraryView" class="view active">
         <header class="topbar">
           <div class="brand">
@@ -257,35 +259,8 @@
         </main>
       </section>
 
-      <!-- ================= NOTE POPUP ================= -->
-      <div id="notePopup" class="note-popup">
-        <div class="popup-header">
-          <strong id="popupTitle">Add Note</strong>
-          <button id="closePopupBtn">×</button>
-        </div>
-        <div id="popupStepOne">
-          <p class="popup-selected">"<span id="selectedTextPreview"></span>"</p>
-          <label>Note Type</label>
-          <div class="note-type-row">
-            <button class="type-btn active" data-type="chapter">Chapter Note</button>
-            <button class="type-btn" data-type="global">Global Note</button>
-          </div>
-          <button class="btn primary full" id="confirmNoteBtn">Confirm</button>
-        </div>
-        <div id="popupEditor" hidden>
-          <label>Note</label>
-          <textarea id="popupNoteText" placeholder="Write your note..."></textarea>
-          <div class="illustration-section">
-            <label>Illustration</label>
-            <div id="imageSlots" class="image-slots"></div>
-          </div>
-          <div class="source-fields">
-            <input id="popupCaption" class="field" placeholder="Caption (optional)">
-            <input id="popupSource" class="field" placeholder="Source (optional)">
-          </div>
-          <button class="btn primary full" id="saveNoteBtn">Save Note</button>
-        </div>
-      </div>
+      <!-- ================= NOTE POPUP CONTAINER ================= -->
+      <div id="notePopup" class="note-popup"></div>
 
       <!-- ================= CHAPTER LIST DRAWER ================= -->
       <div id="chapterDrawer" class="drawer-overlay">

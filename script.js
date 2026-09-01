@@ -842,7 +842,6 @@ async function deleteStory(storyId) {
   });
   if (!ok) return;
 
-  // Optimistic UI update immediately
   const storyCopy = { ...story };
   state.stories = state.stories.filter(s => s.id !== storyId);
   if (currentStoryId === storyId) {
@@ -855,7 +854,6 @@ async function deleteStory(storyId) {
   showView('libraryView');
   toast(`Story "${storyCopy.title || 'Untitled Story'}" deleted`);
 
-  // Background remote cleanup
   (async () => {
     try {
       if (_supabase) {
@@ -957,7 +955,6 @@ async function deleteChapter(chapterId) {
   });
   if (!ok) return;
 
-  // Optimistic UI update immediately
   story.chapters = story.chapters.filter(c => c.id !== chapterId);
   story.chapters.sort((a,b) => a.number - b.number).forEach((ch, idx) => {
     ch.number = idx + 1;
@@ -971,7 +968,6 @@ async function deleteChapter(chapterId) {
   renderChapterList();
   toast(`Chapter ${chapterNumber} deleted`);
 
-  // Background remote cleanup
   (async () => {
     try {
       if (_supabase) {
@@ -1199,14 +1195,12 @@ function positionPopup(popup, anchor) {
 
   popup.style.transform = 'none';
 
-  // Measure popup dimensions
   const popupWidth = popup.offsetWidth || 340;
-  const popupHeight = popup.offsetHeight || 230;
+  const popupHeight = popup.offsetHeight || 260;
   const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
   const margin = 14;
 
-  // Horizontal position: match anchor left or center, bounded by viewport
   let left = rect.left;
   if (left + popupWidth > viewportWidth - margin) {
     left = viewportWidth - popupWidth - margin;
@@ -1215,7 +1209,6 @@ function positionPopup(popup, anchor) {
     left = margin;
   }
 
-  // Vertical position: place below anchor by default, or above if not enough space below
   let top = rect.bottom + 8;
   const spaceBelow = viewportHeight - rect.bottom - margin;
   const spaceAbove = rect.top - margin;
@@ -1260,7 +1253,6 @@ function openPopup(html, anchor) {
     if (!popup.classList.contains('open')) return;
     if (popup.contains(e.target)) return;
     if (e.target && !document.body.contains(e.target)) return;
-    // Don't close if editing or adding note form is open
     if (popup.querySelector('#newNoteContent') || popup.querySelector('#editNoteContent')) {
       return;
     }
@@ -1352,7 +1344,7 @@ function showNotePopup(note, anchor) {
   }
 }
 
-// ================= EDIT NOTE =================
+// ================= EDIT NOTE (BẢNG EDIT CỦA CHAPTER NOTE, GLOBAL NOTE & KHI NHẤP DẤU MŨI TÊN/EDIT) =================
 function editNote(noteId, type, anchor = null) {
   const story = getStory();
   if (!story) {
@@ -1376,7 +1368,6 @@ function editNote(noteId, type, anchor = null) {
     return;
   }
 
-  // Find DOM anchor element if not explicitly passed
   let effectiveAnchor = anchor;
   if (!effectiveAnchor) {
     effectiveAnchor = document.querySelector(`#readerContent [data-note-id="${note.id}"], #chapterEditor [data-note-id="${note.id}"]`);
@@ -1395,19 +1386,22 @@ function editNote(noteId, type, anchor = null) {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
-    <label>Note</label>
-    <textarea id="editNoteContent" class="field" placeholder="Write your note...">${escapeHTML(note.content || '')}</textarea>
+    <label class="popup-section-label">Note</label>
+    <textarea id="editNoteContent" class="note-textarea" placeholder="Write your note...">${escapeHTML(note.content || '')}</textarea>
     
-    <label>Illustration</label>
-    <div style="display:flex; gap:10px; align-items:stretch;">
-      <div id="editImageSlots" class="image-slots" style="flex:0 0 auto;"></div>
-      <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between; gap:8px; min-width:0;">
-        <input id="editCaption" class="field" placeholder="Caption (optional)" value="${escapeHTML(note.caption || '')}">
-        <input id="editSource" class="field" placeholder="Source (optional)" value="${escapeHTML(note.source || '')}">
+    <div class="illustration-label-wrapper">
+      <label class="illustration-label">Illustration</label>
+    </div>
+    
+    <div class="illustration-container-row">
+      <div id="editImageSlots" class="image-slots-container"></div>
+      <div class="source-fields-column">
+        <input id="editCaption" class="source-field-input" placeholder="Caption (optional)" value="${escapeHTML(note.caption || '')}">
+        <input id="editSource" class="source-field-input" placeholder="Source (optional)" value="${escapeHTML(note.source || '')}">
       </div>
     </div>
     
-    <button class="btn primary full" id="saveEditNoteBtn" type="button" style="margin-top:14px;">Save Changes</button>
+    <button class="btn primary full save-note-btn" id="saveEditNoteBtn" type="button">Save Changes</button>
   `;
 
   openPopup(html, effectiveAnchor);
@@ -1435,7 +1429,7 @@ function editNote(noteId, type, anchor = null) {
     const addBtn = document.createElement('button');
     addBtn.className = 'add-image-btn';
     addBtn.id = 'editAddImageBtn';
-    addBtn.textContent = '＋';
+    addBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
     addBtn.title = 'Add image';
     addBtn.type = 'button';
     container.appendChild(addBtn);
@@ -1523,7 +1517,6 @@ function editNote(noteId, type, anchor = null) {
     note.caption = document.getElementById('editCaption').value.trim();
     note.source = document.getElementById('editSource').value.trim();
 
-    // Optimistic UI update
     saveState(false);
     closeNotePopup();
     renderOverview();
@@ -1532,7 +1525,6 @@ function editNote(noteId, type, anchor = null) {
     }
     toast("Note updated");
 
-    // Background remote update
     (async () => {
       try {
         if (_supabase) {
@@ -1668,7 +1660,7 @@ function showCreateNotePopup(range) {
     <div class="popup-selected">
       <span>"${escapeHTML(selectedText)}"</span>
     </div>
-    <label>Note Type</label>
+    <label class="popup-section-label">Note Type</label>
     <div class="note-type-row">
       <button class="type-btn active" data-type="chapter" type="button">
         <span class="type-icon">🌙</span><span class="type-label">Chapter Note</span>
@@ -1706,7 +1698,7 @@ function closeCreatePopup() {
 }
 window.closeCreatePopup = closeCreatePopup;
 
-// ================= NOTE EDITOR (BƯỚC 2: NHẬP NỘI DUNG) =================
+// ================= NOTE EDITOR (BƯỚC 2: SAU CONFIRM) =================
 function openNoteEditor() {
   const isGlobal = pendingNoteType === "global";
   const noteLabel = isGlobal ? "Global Note" : "Chapter Note";
@@ -1721,23 +1713,26 @@ function openNoteEditor() {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
-    <label>Note</label>
-    <textarea id="newNoteContent" class="field" placeholder="Write your note..."></textarea>
+    <label class="popup-section-label">Note</label>
+    <textarea id="newNoteContent" class="note-textarea" placeholder="Write your note..."></textarea>
     
-    <label>Illustration</label>
-    <div style="display:flex; gap:10px; align-items:stretch;">
-      <div id="newImageSlots" class="image-slots" style="flex:0 0 auto;">
+    <div class="illustration-label-wrapper">
+      <label class="illustration-label">Illustration</label>
+    </div>
+    
+    <div class="illustration-container-row">
+      <div id="newImageSlots" class="image-slots-container">
         <button class="add-image-btn" id="firstImageBtn" title="Add image" type="button">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
       </div>
-      <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between; gap:8px; min-width:0;">
-        <input id="newCaption" class="field" placeholder="Caption (optional)">
-        <input id="newSource" class="field" placeholder="Source (optional)">
+      <div class="source-fields-column">
+        <input id="newCaption" class="source-field-input" placeholder="Caption (optional)">
+        <input id="newSource" class="source-field-input" placeholder="Source (optional)">
       </div>
     </div>
     
-    <button class="btn primary full" id="saveNewNoteBtn" type="button" style="margin-top:14px;">Save Note</button>
+    <button class="btn primary full save-note-btn" id="saveNewNoteBtn" type="button">Save Note</button>
   `;
   
   const anchor = getAnchorFromRange(selectedRange);
@@ -1836,7 +1831,7 @@ function renderPendingImages() {
   });
   const addBtn = document.createElement("button");
   addBtn.className = "add-image-btn";
-  addBtn.textContent = "＋";
+  addBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
   addBtn.title = "Add another image";
   addBtn.type = "button";
   addBtn.addEventListener("click", addImageSlot);
@@ -2261,7 +2256,6 @@ async function deleteNote(noteId, type = "chapter") {
 
   closeNotePopup();
 
-  // Optimistic UI update immediately
   const noteCopy = { ...targetNote };
   if (type === "global") {
     story.globalNotes = story.globalNotes.filter(n => n.id !== noteId);
@@ -2283,7 +2277,6 @@ async function deleteNote(noteId, type = "chapter") {
   }
   toast(`Note deleted`);
 
-  // Background remote cleanup
   (async () => {
     try {
       if (noteCopy.source) {
@@ -2545,12 +2538,10 @@ document.getElementById("addGlobalNoteBtn")?.addEventListener("click", async () 
   };
   story.globalNotes.push(note);
 
-  // Optimistic UI update
   saveState(false);
   renderOverview();
   toast("Global note added");
 
-  // Background remote save
   (async () => {
     try {
       if (_supabase) {

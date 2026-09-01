@@ -106,7 +106,7 @@ textarea { resize: vertical; }
 .muted { color: var(--muted); }
 .eyebrow { margin: 0 0 6px; color: var(--purple); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
 
-/* ===== DAY/NIGHT THEME SWITCH (GLASSO-MORPHISM SLIDING PILL) ===== */
+/* ===== DAY/NIGHT THEME SWITCH ===== */
 .theme-toggle {
   display: inline-block;
   padding: 0;
@@ -176,7 +176,6 @@ textarea { resize: vertical; }
   pointer-events: none;
 }
 
-/* Dark Mode Toggle Active State */
 [data-theme="dark"] .theme-toggle {
   background: rgba(30, 23, 48, 0.75);
   border-color: rgba(157, 125, 249, 0.32);
@@ -425,7 +424,10 @@ textarea { resize: vertical; }
   text-align: left;
   flex: 1 1 auto;
 }
-.note-popup label {
+
+/* Base popup labels */
+.note-popup label,
+.popup-section-label {
   display: block;
   font-size: 11.5px;
   text-transform: uppercase;
@@ -434,6 +436,7 @@ textarea { resize: vertical; }
   margin: 8px 0 6px;
   color: var(--muted);
 }
+
 .note-type-row {
   display: flex;
   gap: 6px;
@@ -483,9 +486,10 @@ textarea { resize: vertical; }
   background: #2b2149;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(157, 125, 249, 0.3);
 }
-#popupNoteText, #newNoteContent, #editNoteContent {
+
+#popupNoteText, #newNoteContent, #editNoteContent, .note-textarea {
   width: 100%;
-  min-height: 95px;
+  min-height: 92px;
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 12px;
@@ -497,23 +501,71 @@ textarea { resize: vertical; }
   line-height: 1.5;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.3s ease;
   resize: vertical;
+  box-sizing: border-box;
+  display: block;
 }
-#popupNoteText:focus, #newNoteContent:focus, #editNoteContent:focus {
+#popupNoteText:focus, #newNoteContent:focus, #editNoteContent:focus, .note-textarea:focus {
   border-color: var(--purple);
   box-shadow: 0 0 0 3px rgba(118, 84, 216, 0.15);
 }
 
-.image-slots {
+/* =========================================================================
+   NOTE EDITOR / ILLUSTRATION ALIGNMENT FIX
+   - "mép trên caption ép ngang mép ngang illustration"
+   - "mép dưới source ép ngang mép dưới illustration"
+   - "chữ illustration nằm chính giữa chỗ khung illustration với chỗ ghi note"
+   ========================================================================= */
+
+.illustration-label-wrapper {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
+  margin: 12px 0 8px 0; /* Centered in the vertical space between note textarea and illustration frame */
+  padding: 0;
 }
-.image-slot {
-  width: 68px;
-  height: 68px;
-  border: 1px dashed var(--purple);
+
+.illustration-label {
+  margin: 0 !important;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.illustration-container-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  height: 82px; /* Fixed height container locking top and bottom edges together */
+  margin-bottom: 2px;
+  box-sizing: border-box;
+}
+
+.image-slots-container {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex: 0 0 auto;
+  height: 82px;
+}
+
+.image-slot,
+.add-image-btn {
+  width: 82px;
+  height: 82px;
+  min-width: 82px;
+  min-height: 82px;
+  max-width: 82px;
+  max-height: 82px;
   border-radius: 10px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.image-slot {
+  border: 1px dashed var(--purple);
   background: var(--purple-light);
   position: relative;
   overflow: hidden;
@@ -521,20 +573,14 @@ textarea { resize: vertical; }
   align-items: center;
   justify-content: center;
 }
+
 .image-slot img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
-.image-slot-label {
-  color: var(--purple);
-  font-size: 11px;
-  text-align: center;
-  padding: 4px;
-}
-.image-slot input {
-  display: none;
-}
+
 .image-remove {
   position: absolute;
   top: 3px;
@@ -550,13 +596,17 @@ textarea { resize: vertical; }
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 5;
+  transition: transform 0.15s ease;
 }
+.image-remove:hover {
+  transform: scale(1.1);
+  background: rgba(220, 38, 38, 0.85);
+}
+
 .add-image-btn {
-  width: 68px;
-  height: 68px;
   border: 1px dashed var(--border);
   background: var(--input-bg);
-  border-radius: 10px;
   color: var(--purple);
   font-size: 20px;
   cursor: pointer;
@@ -565,9 +615,52 @@ textarea { resize: vertical; }
   justify-content: center;
   transition: 0.18s ease;
 }
+
 .add-image-btn:hover {
   background: var(--purple-soft);
   border-color: var(--purple);
+}
+
+.source-fields-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 82px; /* Matches illustration box height exactly */
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.source-field-input {
+  width: 100%;
+  height: 37px; /* 37px + 8px gap + 37px = 82px total height! */
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  margin: 0;
+  display: block;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.source-field-input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(118, 84, 216, 0.15);
+}
+
+.save-note-btn {
+  margin-top: 14px;
+  height: 42px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .drawer-overlay { display: none; position: fixed; inset: 0; background: var(--modal-overlay); z-index: 80; backdrop-filter: blur(3px); }
