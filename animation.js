@@ -1371,7 +1371,8 @@ export const animationData = {
                   "o": { "a": 0, "k": 100, "ix": 7 }
                 }
               ]
-            },
+            }
+            ,
             {
               "ty": "gr",
               "bm": 0,
