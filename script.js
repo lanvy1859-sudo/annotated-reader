@@ -1192,31 +1192,47 @@ function handleTextSelection() {
 
 function showCreateNotePopup(anchor) {
   pendingImages = [];
+  pendingNoteType = "chapter"; // Always reset to chapter note by default
+
   const html = `
     <div class="popup-header">
-      <strong class="popup-tag chapter"><span>✨</span> Add Note</strong>
+      <strong id="createPopupTag" class="popup-tag chapter"><span>🌙</span> Add Note</strong>
       <button id="closeCreateBtn" type="button" class="icon-action-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
     <div class="popup-selected"><span>"${escapeHTML(selectedText)}"</span></div>
-    <label class="popup-section-label">Note Type</label>
     <div class="note-type-row">
-      <button class="type-btn active" data-type="chapter" type="button"><span class="type-icon">🌙</span><span class="type-label">Chapter Note</span></button>
-      <button class="type-btn" data-type="global" type="button"><span class="type-icon">🪐</span><span class="type-label">Global Note</span></button>
+      <button class="type-btn active" data-type="chapter" id="typeBtnChapter" type="button"><span class="type-icon">🌙</span><span class="type-label">Chapter Note</span></button>
+      <button class="type-btn" data-type="global" id="typeBtnGlobal" type="button"><span class="type-icon">🪐</span><span class="type-label">Global Note</span></button>
     </div>
     <button class="btn primary full" id="confirmSelectionBtn" type="button">Confirm</button>
   `;
   openPopup(html, anchor);
 
   const popup = document.getElementById('notePopup');
+  const tag = popup?.querySelector("#createPopupTag");
+
   popup?.querySelectorAll(".type-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const chosenType = btn.getAttribute("data-type") || "chapter";
+      pendingNoteType = chosenType;
       popup.querySelectorAll(".type-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      pendingNoteType = btn.dataset.type;
+      if (tag) {
+        if (chosenType === 'global') {
+          tag.className = 'popup-tag global';
+          tag.innerHTML = '<span>🪐</span> Global Note';
+        } else {
+          tag.className = 'popup-tag chapter';
+          tag.innerHTML = '<span>🌙</span> Chapter Note';
+        }
+      }
     });
   });
+
   document.getElementById("closeCreateBtn")?.addEventListener("click", closePopup);
-  document.getElementById("confirmSelectionBtn")?.addEventListener("click", () => {
+  document.getElementById("confirmSelectionBtn")?.addEventListener("click", (e) => {
+    e.stopPropagation();
     openNoteEditor(anchor);
   });
 }
@@ -1225,7 +1241,9 @@ function openNoteEditor(anchor) {
   const isGlobal = pendingNoteType === "global";
   const html = `
     <div class="popup-header">
-      <strong class="popup-tag ${isGlobal ? 'global' : 'chapter'}"><span>${isGlobal ? '🪐' : '🌙'}</span> ${isGlobal ? 'Global Note' : 'Chapter Note'}</strong>
+      <strong class="popup-tag ${isGlobal ? 'global' : 'chapter'}">
+        <span>${isGlobal ? '🪐' : '🌙'}</span> ${isGlobal ? 'Global Note' : 'Chapter Note'}
+      </strong>
       <button id="closeNoteEditorBtn" type="button" class="icon-action-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
     <label class="popup-section-label">Note</label>
@@ -1241,6 +1259,7 @@ function openNoteEditor(anchor) {
     <button class="btn primary full save-note-btn" id="saveNewNoteBtn" type="button">Save Note</button>
   `;
   openPopup(html, anchor);
+
   renderImageSlotsHelper("newImageSlots", pendingImages, (imgs) => {
     pendingImages = imgs;
   });
@@ -1263,15 +1282,17 @@ function openNoteEditor(anchor) {
       selectedText,
       content,
       images: [...pendingImages],
-      caption: document.getElementById("newCaption").value.trim(),
-      source: document.getElementById("newSource").value.trim(),
+      caption: document.getElementById("newCaption")?.value.trim() || "",
+      source: document.getElementById("newSource")?.value.trim() || "",
       chapterId: chapter.id,
       createdAt: new Date().toISOString()
     };
 
     if (pendingNoteType === 'chapter') {
+      if (!chapter.notes) chapter.notes = [];
       chapter.notes.push(newNote);
     } else {
+      if (!story.globalNotes) story.globalNotes = [];
       story.globalNotes.push({ ...newNote, title: selectedText, category: 'Term', keywords: [selectedText] });
     }
 
@@ -1306,7 +1327,7 @@ function openNoteEditor(anchor) {
 
     saveState(state);
     closePopup();
-    toast("Note saved");
+    toast(pendingNoteType === 'global' ? "Global note saved" : "Chapter note saved");
     renderReader();
     if (currentView === 'overviewView') renderOverview();
 
