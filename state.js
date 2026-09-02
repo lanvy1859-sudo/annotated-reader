@@ -107,32 +107,28 @@ export function cleanStaleAnnotations(htmlContent, validNoteIds) {
 // ================= IMAGE SYNC SERIALIZATION =================
 export function embedImagesInCaption(caption, images) {
   const cleanCaption = (caption || '').replace(/<!--images:[\s\S]*?-->/g, '').trim();
-  if (!images || !Array.isArray(images) || images.length === 0) {
-    return cleanCaption;
-  }
-  const tag = `<!--images:${JSON.stringify(images)}-->`;
+  const imgs = Array.isArray(images) ? images : [];
+  // Explicitly embed tag so all devices know whether images exist or are empty []
+  const tag = `<!--images:${JSON.stringify(imgs)}-->`;
   return cleanCaption ? `${cleanCaption}\n${tag}` : tag;
 }
 
 export function extractImagesFromCaption(rawCaption, existingImages = []) {
   if (!rawCaption || typeof rawCaption !== 'string') {
-    return { caption: rawCaption || '', images: Array.isArray(existingImages) ? existingImages : [] };
+    return { caption: rawCaption || '', images: [] };
   }
+  const cleanCaption = rawCaption.replace(/<!--images:[\s\S]*?-->/g, '').trim();
   const match = rawCaption.match(/<!--images:([\s\S]*?)-->/);
-  let extractedImages = [];
   if (match && match[1]) {
     try {
       const parsed = JSON.parse(match[1]);
       if (Array.isArray(parsed)) {
-        extractedImages = parsed;
+        return { caption: cleanCaption, images: parsed };
       }
     } catch (e) {}
   }
-  const cleanCaption = rawCaption.replace(/<!--images:[\s\S]*?-->/g, '').trim();
-  const finalImages = (extractedImages.length > 0)
-    ? extractedImages
-    : (Array.isArray(existingImages) ? existingImages : []);
-  return { caption: cleanCaption, images: finalImages };
+  // If no tag is found in the remote caption, there are no images on Supabase
+  return { caption: cleanCaption, images: [] };
 }
 
 // ================= INDEXEDDB PERSISTENCE =================
@@ -520,18 +516,23 @@ export async function syncPendingLocalDataToSupabase(currentState) {
     for (const story of currentState.stories) {
       if (story.globalNotes && Array.isArray(story.globalNotes)) {
         for (const gn of story.globalNotes) {
-          if (!deletedIds.has(gn.id)) {
-            await syncNoteToSupabase(gn, story.id, null);
+          if (gn._isOfflinePending && !deletedIds.has(gn.id)) {
+            const ok = await syncNoteToSupabase(gn, story.id, null);
+            if (ok) delete gn._isOfflinePending;
           }
         }
       }
       if (story.chapters && Array.isArray(story.chapters)) {
         for (const ch of story.chapters) {
-          await syncChapterToSupabase(ch, story.id);
+          if (ch._isOfflinePending) {
+            const ok = await syncChapterToSupabase(ch, story.id);
+            if (ok) delete ch._isOfflinePending;
+          }
           if (ch.notes && Array.isArray(ch.notes)) {
             for (const cn of ch.notes) {
-              if (!deletedIds.has(cn.id)) {
-                await syncNoteToSupabase(cn, story.id, ch.id);
+              if (cn._isOfflinePending && !deletedIds.has(cn.id)) {
+                const ok = await syncNoteToSupabase(cn, story.id, ch.id);
+                if (ok) delete cn._isOfflinePending;
               }
             }
           }
@@ -614,24 +615,29 @@ export async function fetchStoriesFromSupabase() {
     const chapterObjects = storyChapters.map(ch => {
       const localChap = (localStoryMatch?.chapters || []).find(c => c.id === ch.id);
       const remoteChapterNotes = (chapterNotesMap[ch.id] || []).map(n => {
-        const localNote = (localChap?.notes || []).find(ln => ln.id === n.id);
-        const { caption: cleanCaption, images: extractedImages } = extractImagesFromCaption(n.caption, localNote?.images || n.images);
+        const { caption: cleanCaption, images: extractedImages } = extractImagesFromCaption(n.caption);
 
         return {
           id: n.id,
           type: n.type || 'chapter',
-          selectedText: n.selected_text || localNote?.selectedText || '',
-          content: n.note_text || localNote?.content || '',
+          selectedText: n.selected_text || '',
+          content: n.note_text || '',
           images: extractedImages,
-          caption: cleanCaption || localNote?.caption || '',
-          source: n.source || localNote?.source || '',
+          caption: cleanCaption || '',
+          source: n.source || '',
           chapterId: ch.id,
-          createdAt: n.created_at || localNote?.createdAt || new Date().toISOString()
+          createdAt: n.created_at || new Date().toISOString()
         };
       });
 
       const rawContent = ch.content || localChap?.content || '';
       const cleanedContent = cleanStaleAnnotations(rawContent, validStoryNoteIds);
+
+      // If chapter content on Supabase had stale annotations that were cleaned, sync cleaned content back to Supabase
+      if (ch.content && rawContent !== cleanedContent) {
+        ch.content = cleanedContent;
+        syncChapterToSupabase({ id: ch.id, title: ch.title, content: cleanedContent, number: ch.chapter_order }, story.id).catch(e => console.warn('Sync cleaned chapter content error:', e));
+      }
 
       return {
         id: ch.id,
@@ -652,22 +658,21 @@ export async function fetchStoriesFromSupabase() {
     }
 
     const globalNoteObjects = globalNotes.map(n => {
-      const localNote = (localStoryMatch?.globalNotes || []).find(ln => ln.id === n.id);
-      const { caption: cleanCaption, images: extractedImages } = extractImagesFromCaption(n.caption, localNote?.images || n.images);
+      const { caption: cleanCaption, images: extractedImages } = extractImagesFromCaption(n.caption);
 
       return {
         id: n.id,
         type: 'global',
-        category: n.category || localNote?.category || 'Term',
-        title: n.selected_text || localNote?.title || localNote?.selectedText || '',
-        content: n.note_text || localNote?.content || '',
-        selectedText: n.selected_text || localNote?.selectedText || localNote?.title || '',
+        category: n.category || 'Term',
+        title: n.selected_text || '',
+        content: n.note_text || '',
+        selectedText: n.selected_text || '',
         images: extractedImages,
-        caption: cleanCaption || localNote?.caption || '',
-        source: n.source || localNote?.source || '',
-        keywords: [n.selected_text || localNote?.title || ''],
-        chapterId: n.chapter_id || localNote?.chapterId || null,
-        createdAt: n.created_at || localNote?.createdAt || new Date().toISOString()
+        caption: cleanCaption || '',
+        source: n.source || '',
+        keywords: [n.selected_text || ''],
+        chapterId: n.chapter_id || null,
+        createdAt: n.created_at || new Date().toISOString()
       };
     });
 

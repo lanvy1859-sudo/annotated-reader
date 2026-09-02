@@ -169,8 +169,6 @@ async function initApp() {
     if (supabaseStories && supabaseStories.length > 0) {
       state.stories = supabaseStories;
       saveState(state);
-      // Run background sync for any local data not yet on Supabase
-      syncPendingLocalDataToSupabase(state).catch(e => console.warn("Background sync error:", e));
     }
   } catch (err) {
     console.warn("Using local state:", err?.message || err);
@@ -684,27 +682,41 @@ function openChapter(chapterId, noteId, keyword) {
         smoothScrollTo(target, 400);
         target.classList.add('highlight-chapter');
         setTimeout(() => target.classList.remove('highlight-chapter'), 2000);
-      } else {
-        const chapter = getChapter();
-        const note = (chapter?.notes?.find(n => n.id === noteId)) || (story?.globalNotes?.find(n => n.id === noteId));
-        const searchTerm = (note?.selectedText || note?.title || keyword || '').trim().toLowerCase();
+      } else if (keyword) {
+        const searchTerm = keyword.trim().toLowerCase();
         if (searchTerm) {
           const readerContent = document.getElementById("readerContent");
           if (readerContent) {
             const walker = document.createTreeWalker(readerContent, NodeFilter.SHOW_TEXT, null);
             let node;
             while ((node = walker.nextNode())) {
-              if (node.textContent && node.textContent.toLowerCase().includes(searchTerm)) {
+              const text = node.textContent || '';
+              const idx = text.toLowerCase().indexOf(searchTerm);
+              if (idx !== -1) {
                 if (node.parentElement) {
                   smoothScrollTo(node.parentElement, 400);
-                  node.parentElement.classList.add('highlight-chapter');
-                  setTimeout(() => node.parentElement.classList.remove('highlight-chapter'), 2000);
+                  try {
+                    const range = document.createRange();
+                    range.setStart(node, idx);
+                    range.setEnd(node, idx + searchTerm.length);
+                    const mark = document.createElement('mark');
+                    mark.className = 'highlight-chapter temp-search-highlight';
+                    range.surroundContents(mark);
+                    setTimeout(() => {
+                      if (mark.parentNode) {
+                        while (mark.firstChild) mark.parentNode.insertBefore(mark.firstChild, mark);
+                        mark.parentNode.removeChild(mark);
+                      }
+                    }, 2000);
+                  } catch (e) {}
                   return;
                 }
               }
             }
           }
         }
+        window.scrollTo(0, 0);
+      } else {
         window.scrollTo(0, 0);
       }
     }, 300);
@@ -730,8 +742,8 @@ function renderReader() {
   ]);
 
   let contentChanged = false;
-  reader.querySelectorAll('.editor-annotation, .annotation').forEach(el => {
-    const noteId = el.dataset.noteId;
+  reader.querySelectorAll('.editor-annotation, .annotation, [data-note-id]').forEach(el => {
+    const noteId = el.dataset.noteId || el.getAttribute('data-note-id');
     if (!noteId || !allNoteIds.has(noteId)) {
       const parent = el.parentNode;
       if (parent) {
@@ -937,7 +949,7 @@ function editNote(noteId, type, anchor) {
   if (!note) return;
 
   const isGlobal = note.type === "global";
-  const editingImages = Array.isArray(note.images) ? [...note.images] : [];
+  let editingImages = Array.isArray(note.images) ? [...note.images] : [];
   const html = `
     <div class="popup-header">
       <strong class="popup-tag ${isGlobal ? 'global' : 'chapter'}">
