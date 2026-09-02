@@ -288,6 +288,9 @@ export function getSynchronousStartupTheme() {
 
 export async function fetchStoriesFromSupabase() {
   if (!_supabase) return null;
+  try {
+    await autoLogin();
+  } catch (e) {}
   const fetchWithTimeout = async (promise, ms = 3000) => {
     let timer;
     const timeoutPromise = new Promise((_, reject) => {
@@ -396,7 +399,7 @@ export async function fetchStoriesFromSupabase() {
       });
     }
 
-    const persistentTheme = savedThemeMap[story.id] || story.theme_color || localStoryMatch?.themeColor || '#7654d8';
+    const persistentTheme = story.theme_color || savedThemeMap[story.id] || localStoryMatch?.themeColor || '#7654d8';
     saveStoryTheme(story.id, persistentTheme);
 
     return {

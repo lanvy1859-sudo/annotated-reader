@@ -6,7 +6,8 @@
 import {
   applyStoryTheme,
   updateLoadingScreenTheme,
-  getThemedAnimationData
+  getThemedAnimationData,
+  saveStoryTheme
 } from './theme.js';
 
 import {
@@ -345,8 +346,10 @@ function openStory(storyId) {
   const story = getStory();
   if (story) {
     const themeColor = story.themeColor || '#7654d8';
+    saveStoryTheme(story.id, themeColor);
     applyStoryTheme(themeColor);
     try { localStorage.setItem(ACTIVE_COLOR_KEY, themeColor); } catch (e) {}
+    updateLoadingScreenTheme(themeColor, currentTheme === 'dark');
   }
   renderStory();
   showView("storyView");
@@ -1550,9 +1553,11 @@ document.getElementById("overviewBackBtn")?.addEventListener("click", () => {
 document.getElementById("storyPaletteBtn")?.addEventListener("click", () => {
   const story = getStory();
   if (!story) return;
-  openThemeCustomizerModal(story, (updatedStory) => {
-    saveState(state);
+  openThemeCustomizerModal(story, async (updatedStory) => {
     const newColor = updatedStory.themeColor || '#7654d8';
+    story.themeColor = newColor;
+    saveStoryTheme(story.id, newColor);
+    saveState(state);
     try { localStorage.setItem(ACTIVE_COLOR_KEY, newColor); } catch (e) {}
     toast(`Theme palette updated for "${updatedStory.title}"`);
     renderStory();
@@ -1561,7 +1566,16 @@ document.getElementById("storyPaletteBtn")?.addEventListener("click", () => {
     renderLibrary();
 
     if (_supabase) {
-      _supabase.from('stories').update({ theme_color: updatedStory.themeColor, updated_at: new Date().toISOString() }).eq('id', updatedStory.id).then();
+      try {
+        await autoLogin();
+        const { error } = await _supabase.from('stories').update({
+          theme_color: newColor,
+          updated_at: new Date().toISOString()
+        }).eq('id', story.id);
+        if (error) console.warn("Supabase theme update error:", error);
+      } catch (err) {
+        console.warn("Supabase theme update exception:", err);
+      }
     }
   });
 });
