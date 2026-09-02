@@ -34,8 +34,8 @@
   --progress-gradient: linear-gradient(90deg, #c4b5fd, #8b5cf6);
   --toggle-track-bg: rgba(255, 255, 255, 0.55);
   --toggle-border: #e8e4ed;
-  --toggle-knob-bg: radial-gradient(circle at 35% 35%, #ffb347 0%, #ff8c00 100%);
-  --toggle-knob-shadow: 0 2px 8px rgba(255, 140, 0, 0.5);
+  --toggle-knob-bg: radial-gradient(circle at 35% 35%, #9d7df9 0%, #7654d8 100%);
+  --toggle-knob-shadow: 0 2px 8px rgba(118, 84, 216, 0.45);
 }
 
 [data-theme="dark"] {
@@ -174,11 +174,11 @@ textarea { resize: vertical; }
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--toggle-knob-bg, radial-gradient(circle at 35% 35%, #ffb347 0%, #ff8c00 100%));
+  background: var(--toggle-knob-bg, radial-gradient(circle at 35% 35%, #9d7df9 0%, #7654d8 100%));
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--toggle-knob-shadow, 0 2px 8px rgba(255, 140, 0, 0.5));
+  box-shadow: var(--toggle-knob-shadow, 0 2px 8px rgba(118, 84, 216, 0.45));
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.35s ease, box-shadow 0.35s ease;
   z-index: 2;
 }
@@ -373,6 +373,26 @@ textarea { resize: vertical; }
   font-weight: 400;
 }
 
+::selection {
+  background: var(--purple-soft, rgba(118, 84, 216, 0.28));
+  color: inherit;
+}
+::-moz-selection {
+  background: var(--purple-soft, rgba(118, 84, 216, 0.28));
+  color: inherit;
+}
+
+.active-selection-highlight {
+  background: var(--purple-soft, rgba(118, 84, 216, 0.3));
+  color: inherit;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--purple-soft, rgba(118, 84, 216, 0.45));
+  text-decoration: underline;
+  text-decoration-color: var(--purple);
+  text-decoration-thickness: 2.5px;
+  transition: all 0.2s ease;
+}
+
 .annotation, .editor-annotation { text-decoration: underline; text-decoration-color: var(--purple); text-decoration-thickness: 2px; background: transparent; padding: 0 2px; border-radius: 3px; cursor: pointer; transition: 0.2s; color: inherit; }
 .annotation:hover, .editor-annotation:hover { text-decoration-color: var(--purple-dark); }
 .annotation-block { margin: 18px 0 35px; padding: 20px; border-left: 3px solid var(--purple); background: var(--annotation-box-bg); border-radius: 0 12px 12px 0; }
@@ -413,7 +433,23 @@ textarea { resize: vertical; }
 .field { width: 100%; padding: 11px 13px; border: 1.5px solid var(--input-border, var(--border)); border-radius: 9px; background: var(--input-bg); color: var(--text); outline: none; transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease; }
 .field:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-soft); background: var(--card-bg, #ffffff); }
 .editor-toolbar { margin-top: 20px; display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 13px; }
-.chapter-editor { background: var(--paper-bg); color: var(--paper-text); border: 1px solid var(--border); border-radius: 14px; margin-top: 12px; padding: 35px; min-height: 500px; outline: none; font-family: Georgia, "Times New Roman", serif; font-size: 18px; line-height: 1.9; }
+.chapter-editor {
+  background: var(--paper-bg);
+  color: var(--paper-text);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-top: 12px;
+  padding: 35px;
+  min-height: 500px;
+  outline: none;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.9;
+  -webkit-touch-callout: none;
+}
+.reader-content, .reader-paper {
+  -webkit-touch-callout: none;
+}
 .chapter-editor:focus { border-color: var(--purple); }
 .chapter-editor p { margin-bottom: 1.3em; }
 

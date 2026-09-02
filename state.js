@@ -301,7 +301,7 @@ export function extractThemeAndCleanDescription(rawDescription) {
 }
 
 export async function syncStoryThemeToSupabase(storyId, themeColor, rawDescription = '') {
-  if (!_supabase) return;
+  if (!_supabase) return false;
   try {
     await autoLogin();
     const { description } = extractThemeAndCleanDescription(rawDescription);
@@ -315,13 +315,16 @@ export async function syncStoryThemeToSupabase(storyId, themeColor, rawDescripti
 
     if (error) {
       console.warn("Falling back to description-embedded theme sync:", error.message);
-      await _supabase.from('stories').update({
+      const res = await _supabase.from('stories').update({
         description: descWithTag,
         updated_at: new Date().toISOString()
       }).eq('id', storyId);
+      return !res.error;
     }
+    return true;
   } catch (err) {
     console.warn("syncStoryThemeToSupabase exception:", err);
+    return false;
   }
 }
 
@@ -330,7 +333,7 @@ export async function fetchStoriesFromSupabase() {
   try {
     await autoLogin();
   } catch (e) {}
-  const fetchWithTimeout = async (promise, ms = 3000) => {
+  const fetchWithTimeout = async (promise, ms = 6000) => {
     let timer;
     const timeoutPromise = new Promise((_, reject) => {
       timer = setTimeout(() => reject(new Error("Supabase request timed out")), ms);

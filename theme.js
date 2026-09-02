@@ -116,8 +116,8 @@ export function generateStoryPalette(baseHex) {
         '--progress-gradient': 'linear-gradient(90deg, #c4b5fd, #8b5cf6)',
         '--toggle-track-bg': 'rgba(255, 255, 255, 0.55)',
         '--toggle-border': '#e8e4ed',
-        '--toggle-knob-bg': 'radial-gradient(circle at 35% 35%, #ffb347 0%, #ff8c00 100%)',
-        '--toggle-knob-shadow': '0 2px 8px rgba(255, 140, 0, 0.5)'
+        '--toggle-knob-bg': 'radial-gradient(circle at 35% 35%, #9d7df9 0%, #7654d8 100%)',
+        '--toggle-knob-shadow': '0 2px 8px rgba(118, 84, 216, 0.45)'
       },
       dark: {
         '--purple': '#9d7df9',

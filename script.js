@@ -733,6 +733,8 @@ function renderReader() {
       }
     } else {
       el.addEventListener("click", event => {
+        const selection = window.getSelection();
+        if (selection && selection.toString().trim().length > 0) return;
         event.stopPropagation();
         const note = (chapter.notes || []).find(n => n.id === noteId) || (story.globalNotes || []).find(n => n.id === noteId);
         if (note) showNotePopup(note, el);
@@ -792,10 +794,11 @@ function openPopup(html, anchor) {
 
 function closePopup() {
   const popup = document.getElementById('notePopup');
-  if (!popup) return;
-  popup.classList.remove('open');
-  popup.style.display = 'none';
-  popup.style.visibility = 'hidden';
+  if (popup) {
+    popup.classList.remove('open');
+    popup.style.display = 'none';
+    popup.style.visibility = 'hidden';
+  }
 }
 
 function showNotePopup(note, anchor) {
@@ -1103,12 +1106,50 @@ document.getElementById("saveChapterBtn")?.addEventListener("click", async () =>
   }
 });
 
-// Text selection and annotation click in editor
-document.getElementById("chapterEditor")?.addEventListener("mouseup", handleTextSelection);
+// Text selection and annotation click in reader & editor
+const chapterEditorEl = document.getElementById("chapterEditor");
+chapterEditorEl?.addEventListener("mouseup", handleTextSelection);
+chapterEditorEl?.addEventListener("touchend", () => {
+  setTimeout(handleTextSelection, 120);
+});
+chapterEditorEl?.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  const annotationEl = e.target.closest('.editor-annotation, .annotation');
+  if (annotationEl) {
+    const noteId = annotationEl.dataset.noteId;
+    const story = getStory();
+    const chapter = getChapter();
+    if (story && chapter && noteId) {
+      const note = chapter.notes.find(n => n.id === noteId) || story.globalNotes.find(n => n.id === noteId);
+      if (note) return showNotePopup(note, annotationEl);
+    }
+  }
+  handleTextSelection();
+});
+
+const readerContentEl = document.getElementById("readerContent");
+readerContentEl?.addEventListener("mouseup", handleTextSelection);
+readerContentEl?.addEventListener("touchend", () => {
+  setTimeout(handleTextSelection, 120);
+});
+readerContentEl?.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  const annotationEl = e.target.closest('.editor-annotation, .annotation');
+  if (annotationEl) {
+    const noteId = annotationEl.dataset.noteId;
+    const story = getStory();
+    const chapter = getChapter();
+    if (story && chapter && noteId) {
+      const note = chapter.notes.find(n => n.id === noteId) || story.globalNotes.find(n => n.id === noteId);
+      if (note) return showNotePopup(note, annotationEl);
+    }
+  }
+  handleTextSelection();
+});
+
 document.getElementById("chapterEditor")?.addEventListener("click", handleEditorAnnotationClick);
 
 function handleEditorAnnotationClick(event) {
-  // If user selected text, let mouseup handle selection popup instead
   const selection = window.getSelection();
   if (selection && selection.toString().trim().length > 0) return;
 
@@ -1131,18 +1172,26 @@ function handleTextSelection() {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
   const text = selection.toString().trim();
-  if (!text) return;
+  if (!text || text.length === 0) return;
+
   const range = selection.getRangeAt(0);
   const editor = document.getElementById("chapterEditor");
-  if (!editor || !editor.contains(range.commonAncestorContainer)) return;
+  const reader = document.getElementById("readerContent");
+
+  const isEditor = editor && editor.contains(range.commonAncestorContainer);
+  const isReader = reader && reader.contains(range.commonAncestorContainer);
+  if (!isEditor && !isReader) return;
+
   selectedRange = range.cloneRange();
   selectedText = text;
-  showCreateNotePopup(range);
+
+  const rect = range.getBoundingClientRect();
+  const anchor = { getBoundingClientRect: () => rect };
+  showCreateNotePopup(anchor);
 }
 
-function showCreateNotePopup(range) {
+function showCreateNotePopup(anchor) {
   pendingImages = [];
-  const anchor = { getBoundingClientRect: () => range.getBoundingClientRect() };
   const html = `
     <div class="popup-header">
       <strong class="popup-tag chapter"><span>✨</span> Add Note</strong>
@@ -1168,7 +1217,6 @@ function showCreateNotePopup(range) {
   });
   document.getElementById("closeCreateBtn")?.addEventListener("click", closePopup);
   document.getElementById("confirmSelectionBtn")?.addEventListener("click", () => {
-    closePopup();
     openNoteEditor(anchor);
   });
 }
@@ -1198,6 +1246,7 @@ function openNoteEditor(anchor) {
   });
 
   document.getElementById("closeNoteEditorBtn")?.addEventListener("click", closePopup);
+  setTimeout(() => document.getElementById("newNoteContent")?.focus(), 80);
 
   document.getElementById("saveNewNoteBtn")?.addEventListener("click", async () => {
     const content = document.getElementById("newNoteContent").value.trim();
@@ -1232,20 +1281,34 @@ function openNoteEditor(anchor) {
         span.className = `editor-annotation ${pendingNoteType === 'global' ? 'global-note' : 'chapter-note'}`;
         span.dataset.noteId = noteId;
         span.dataset.noteType = pendingNoteType;
-        const contents = selectedRange.extractContents();
-        span.appendChild(contents);
+        
+        const fragment = selectedRange.extractContents();
+        span.appendChild(fragment);
         selectedRange.insertNode(span);
+
         const editor = document.getElementById("chapterEditor");
-        if (editor) {
+        const reader = document.getElementById("readerContent");
+        if (editor && editor.contains(span)) {
+          editor.normalize();
           chapter.content = editor.innerHTML;
+        } else if (reader && reader.contains(span)) {
+          reader.normalize();
+          chapter.content = reader.innerHTML;
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Error inserting annotation:", e);
+      }
     }
+
+    try {
+      window.getSelection()?.removeAllRanges();
+    } catch (e) {}
 
     saveState(state);
     closePopup();
     toast("Note saved");
     renderReader();
+    if (currentView === 'overviewView') renderOverview();
 
     try {
       if (_supabase) {
@@ -1591,7 +1654,12 @@ document.getElementById("storyPaletteBtn")?.addEventListener("click", () => {
     if (currentView === 'overviewView') renderOverview();
     renderLibrary();
 
-    await syncStoryThemeToSupabase(story.id, newColor, story.description);
+    const syncOk = await syncStoryThemeToSupabase(story.id, newColor, story.description);
+    if (syncOk) {
+      toast(`Theme palette synced to Cloud for "${updatedStory.title}"`);
+    } else {
+      toast(`Theme applied locally (Check Supabase setup)`);
+    }
   });
 });
 
