@@ -686,14 +686,35 @@ function renderReader() {
   const reader = document.getElementById("readerContent");
   reader.innerHTML = chapter.content;
 
+  // Clean up any stale annotations whose notes were deleted
+  const allNoteIds = new Set([
+    ...((story.globalNotes || []).map(n => n.id)),
+    ...((chapter.notes || []).map(n => n.id))
+  ]);
+
+  let contentChanged = false;
   reader.querySelectorAll('.editor-annotation, .annotation').forEach(el => {
-    el.addEventListener("click", event => {
-      event.stopPropagation();
-      const noteId = el.dataset.noteId;
-      const note = chapter.notes.find(n => n.id === noteId) || story.globalNotes.find(n => n.id === noteId);
-      if (note) showNotePopup(note, el);
-    });
+    const noteId = el.dataset.noteId;
+    if (!noteId || !allNoteIds.has(noteId)) {
+      const parent = el.parentNode;
+      if (parent) {
+        while (el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+        contentChanged = true;
+      }
+    } else {
+      el.addEventListener("click", event => {
+        event.stopPropagation();
+        const note = (chapter.notes || []).find(n => n.id === noteId) || (story.globalNotes || []).find(n => n.id === noteId);
+        if (note) showNotePopup(note, el);
+      });
+    }
   });
+
+  if (contentChanged) {
+    chapter.content = reader.innerHTML;
+    saveState(state);
+  }
 }
 
 // ================= POPUP & NOTES =================
@@ -920,30 +941,15 @@ async function deleteNote(noteId, type) {
   if (!ok) return;
 
   closePopup();
-  if (type === 'global') {
-    story.globalNotes = story.globalNotes.filter(n => n.id !== noteId);
-  } else {
-    story.chapters.forEach(ch => {
-      ch.notes = ch.notes.filter(n => n.id !== noteId);
-    });
-  }
 
-  // Cleanly unwrap annotation elements from chapter editor if currently open
-  const editor = document.getElementById("chapterEditor");
-  if (editor) {
-    editor.querySelectorAll(`[data-note-id="${noteId}"]`).forEach(el => {
-      const parent = el.parentNode;
-      if (parent) {
-        while (el.firstChild) parent.insertBefore(el.firstChild, el);
-        parent.removeChild(el);
-      }
-    });
-    const currentChap = getChapter();
-    if (currentChap) currentChap.content = editor.innerHTML;
-  }
+  // 1. Remove note from globalNotes and all chapters' notes unconditionally
+  story.globalNotes = (story.globalNotes || []).filter(n => n.id !== noteId);
+  (story.chapters || []).forEach(ch => {
+    ch.notes = (ch.notes || []).filter(n => n.id !== noteId);
+  });
 
-  // Cleanly unwrap annotation markup from stored chapter contents
-  story.chapters.forEach(ch => {
+  // 2. Cleanly unwrap annotation markup from stored chapter contents
+  (story.chapters || []).forEach(ch => {
     if (ch.content && ch.content.includes(noteId)) {
       const temp = document.createElement('div');
       temp.innerHTML = ch.content;
@@ -958,13 +964,45 @@ async function deleteNote(noteId, type) {
     }
   });
 
+  // 3. Update chapterEditor DOM if present
+  const editor = document.getElementById("chapterEditor");
+  if (editor) {
+    editor.querySelectorAll(`[data-note-id="${noteId}"]`).forEach(el => {
+      const parent = el.parentNode;
+      if (parent) {
+        while (el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+      }
+    });
+  }
+
+  // 4. Update readerContent DOM if present
+  const reader = document.getElementById("readerContent");
+  if (reader) {
+    reader.querySelectorAll(`[data-note-id="${noteId}"]`).forEach(el => {
+      const parent = el.parentNode;
+      if (parent) {
+        while (el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+      }
+    });
+  }
+
   saveState(state);
   renderOverview();
   if (currentView === 'readerView') renderReader();
   toast("Note deleted");
 
   try {
-    if (_supabase) await _supabase.from('notes').delete().eq('id', noteId);
+    if (_supabase) {
+      await _supabase.from('notes').delete().eq('id', noteId);
+      for (const ch of story.chapters) {
+        await _supabase.from('chapters').update({
+          content: ch.content,
+          updated_at: new Date().toISOString()
+        }).eq('id', ch.id);
+      }
+    }
   } catch (err) {
     console.warn("Supabase delete note err:", err);
   }
@@ -976,9 +1014,33 @@ document.getElementById("closeEditorBtn")?.addEventListener("click", closeEditor
 
 function openEditor() {
   const chapter = getChapter();
-  if (!chapter) return;
+  const story = getStory();
+  if (!chapter || !story) return;
   document.getElementById("chapterTitleInput").value = chapter.title || "";
-  document.getElementById("chapterEditor").innerHTML = chapter.content;
+  const editor = document.getElementById("chapterEditor");
+  if (editor) {
+    editor.innerHTML = chapter.content;
+    const allNoteIds = new Set([
+      ...((story.globalNotes || []).map(n => n.id)),
+      ...((chapter.notes || []).map(n => n.id))
+    ]);
+    let editorChanged = false;
+    editor.querySelectorAll('.editor-annotation, .annotation').forEach(el => {
+      const noteId = el.dataset.noteId;
+      if (!noteId || !allNoteIds.has(noteId)) {
+        const parent = el.parentNode;
+        if (parent) {
+          while (el.firstChild) parent.insertBefore(el.firstChild, el);
+          parent.removeChild(el);
+          editorChanged = true;
+        }
+      }
+    });
+    if (editorChanged) {
+      chapter.content = editor.innerHTML;
+      saveState(state);
+    }
+  }
   document.getElementById("editorPanel")?.classList.add("open");
 }
 function closeEditor() {
