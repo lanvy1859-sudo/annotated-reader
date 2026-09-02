@@ -286,6 +286,45 @@ export function getSynchronousStartupTheme() {
   }
 }
 
+export function embedThemeInDescription(description, themeColor) {
+  const clean = (description || '').replace(/<!--theme:#[0-9a-fA-F]{3,8}-->/g, '').trim();
+  if (!themeColor) return clean;
+  return clean ? `${clean}\n<!--theme:${themeColor}-->` : `<!--theme:${themeColor}-->`;
+}
+
+export function extractThemeAndCleanDescription(rawDescription) {
+  if (!rawDescription) return { description: '', themeColor: null };
+  const match = rawDescription.match(/<!--theme:(#[0-9a-fA-F]{3,8})-->/);
+  const themeColor = match ? match[1] : null;
+  const description = rawDescription.replace(/<!--theme:#[0-9a-fA-F]{3,8}-->/g, '').trim();
+  return { description, themeColor };
+}
+
+export async function syncStoryThemeToSupabase(storyId, themeColor, rawDescription = '') {
+  if (!_supabase) return;
+  try {
+    await autoLogin();
+    const { description } = extractThemeAndCleanDescription(rawDescription);
+    const descWithTag = embedThemeInDescription(description, themeColor);
+
+    const { error } = await _supabase.from('stories').update({
+      theme_color: themeColor,
+      description: descWithTag,
+      updated_at: new Date().toISOString()
+    }).eq('id', storyId);
+
+    if (error) {
+      console.warn("Falling back to description-embedded theme sync:", error.message);
+      await _supabase.from('stories').update({
+        description: descWithTag,
+        updated_at: new Date().toISOString()
+      }).eq('id', storyId);
+    }
+  } catch (err) {
+    console.warn("syncStoryThemeToSupabase exception:", err);
+  }
+}
+
 export async function fetchStoriesFromSupabase() {
   if (!_supabase) return null;
   try {
@@ -399,13 +438,14 @@ export async function fetchStoriesFromSupabase() {
       });
     }
 
-    const persistentTheme = story.theme_color || savedThemeMap[story.id] || localStoryMatch?.themeColor || '#7654d8';
+    const { description: cleanDesc, themeColor: embeddedTheme } = extractThemeAndCleanDescription(story.description);
+    const persistentTheme = story.theme_color || embeddedTheme || savedThemeMap[story.id] || localStoryMatch?.themeColor || '#7654d8';
     saveStoryTheme(story.id, persistentTheme);
 
     return {
       id: story.id,
       title: story.title,
-      description: story.description || localStoryMatch?.description || '',
+      description: cleanDesc || localStoryMatch?.description || '',
       cover: story.cover_url || localStoryMatch?.cover || '',
       themeColor: persistentTheme,
       chapters: chapterObjects,

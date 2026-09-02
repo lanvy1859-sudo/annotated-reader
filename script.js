@@ -25,6 +25,9 @@ import {
   clearNavigationState,
   getSynchronousStartupTheme,
   fetchStoriesFromSupabase,
+  embedThemeInDescription,
+  extractThemeAndCleanDescription,
+  syncStoryThemeToSupabase,
   THEME_KEY,
   ACTIVE_COLOR_KEY
 } from './state.js';
@@ -429,15 +432,27 @@ document.getElementById("addStoryBtn")?.addEventListener("click", async () => {
 
   try {
     if (_supabase) {
-      await _supabase.from('stories').insert({
+      await autoLogin();
+      const descWithTag = embedThemeInDescription(story.description, story.themeColor);
+      const { error } = await _supabase.from('stories').insert({
         id: story.id,
         title: story.title,
-        description: story.description,
-        cover_url: story.cover,
+        description: descWithTag,
+        cover_url: story.cover || null,
         theme_color: story.themeColor,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });
+      if (error) {
+        await _supabase.from('stories').insert({
+          id: story.id,
+          title: story.title,
+          description: descWithTag,
+          cover_url: story.cover || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      }
     }
   } catch (err) {
     console.warn("Supabase insert story err:", err);
@@ -453,14 +468,25 @@ document.getElementById("saveStoryBtn")?.addEventListener("click", async () => {
 
   try {
     if (_supabase) {
-      await _supabase.from('stories').upsert({
+      await autoLogin();
+      const descWithTag = embedThemeInDescription(story.description, story.themeColor);
+      const { error } = await _supabase.from('stories').upsert({
         id: story.id,
         title: story.title,
-        description: story.description,
+        description: descWithTag,
         cover_url: story.cover || null,
         theme_color: story.themeColor || '#7654d8',
         updated_at: new Date().toISOString()
       });
+      if (error) {
+        await _supabase.from('stories').upsert({
+          id: story.id,
+          title: story.title,
+          description: descWithTag,
+          cover_url: story.cover || null,
+          updated_at: new Date().toISOString()
+        });
+      }
     }
   } catch (err) {
     console.warn("Supabase save err:", err);
@@ -1565,18 +1591,7 @@ document.getElementById("storyPaletteBtn")?.addEventListener("click", () => {
     if (currentView === 'overviewView') renderOverview();
     renderLibrary();
 
-    if (_supabase) {
-      try {
-        await autoLogin();
-        const { error } = await _supabase.from('stories').update({
-          theme_color: newColor,
-          updated_at: new Date().toISOString()
-        }).eq('id', story.id);
-        if (error) console.warn("Supabase theme update error:", error);
-      } catch (err) {
-        console.warn("Supabase theme update exception:", err);
-      }
-    }
+    await syncStoryThemeToSupabase(story.id, newColor, story.description);
   });
 });
 
