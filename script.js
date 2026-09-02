@@ -28,6 +28,10 @@ import {
   embedThemeInDescription,
   extractThemeAndCleanDescription,
   syncStoryThemeToSupabase,
+  syncNoteToSupabase,
+  syncChapterToSupabase,
+  deleteNoteFromSupabase,
+  syncPendingLocalDataToSupabase,
   THEME_KEY,
   ACTIVE_COLOR_KEY
 } from './state.js';
@@ -163,6 +167,8 @@ async function initApp() {
     if (supabaseStories && supabaseStories.length > 0) {
       state.stories = supabaseStories;
       saveState(state);
+      // Run background sync for any local data not yet on Supabase
+      syncPendingLocalDataToSupabase(state).catch(e => console.warn("Background sync error:", e));
     }
   } catch (err) {
     console.warn("Using local state:", err?.message || err);
@@ -718,7 +724,7 @@ function renderReader() {
   // Clean up any stale annotations whose notes were deleted
   const allNoteIds = new Set([
     ...((story.globalNotes || []).map(n => n.id)),
-    ...((chapter.notes || []).map(n => n.id))
+    ...((story.chapters || []).flatMap(c => c.notes || []).map(n => n.id))
   ]);
 
   let contentChanged = false;
@@ -736,7 +742,9 @@ function renderReader() {
         const selection = window.getSelection();
         if (selection && selection.toString().trim().length > 0) return;
         event.stopPropagation();
-        const note = (chapter.notes || []).find(n => n.id === noteId) || (story.globalNotes || []).find(n => n.id === noteId);
+        const note = (chapter.notes || []).find(n => n.id === noteId)
+          || (story.globalNotes || []).find(n => n.id === noteId)
+          || (story.chapters || []).flatMap(c => c.notes || []).find(n => n.id === noteId);
         if (note) showNotePopup(note, el);
       });
     }
@@ -945,18 +953,8 @@ function editNote(noteId, type, anchor) {
     if (currentView === 'readerView') renderReader();
     toast("Note updated");
 
-    try {
-      if (_supabase) {
-        await _supabase.from('notes').update({
-          note_text: newContent,
-          caption: note.caption,
-          source: note.source,
-          updated_at: new Date().toISOString()
-        }).eq('id', note.id);
-      }
-    } catch (err) {
-      console.warn("Supabase update note err:", err);
-    }
+    const chapter = getChapter();
+    await syncNoteToSupabase(note, story.id, chapter?.id || note.chapterId);
   });
 }
 
@@ -1025,18 +1023,9 @@ async function deleteNote(noteId, type) {
   if (currentView === 'readerView') renderReader();
   toast("Note deleted");
 
-  try {
-    if (_supabase) {
-      await _supabase.from('notes').delete().eq('id', noteId);
-      for (const ch of story.chapters) {
-        await _supabase.from('chapters').update({
-          content: ch.content,
-          updated_at: new Date().toISOString()
-        }).eq('id', ch.id);
-      }
-    }
-  } catch (err) {
-    console.warn("Supabase delete note err:", err);
+  await deleteNoteFromSupabase(noteId, story.id);
+  for (const ch of story.chapters) {
+    await syncChapterToSupabase(ch, story.id);
   }
 }
 
@@ -1054,7 +1043,7 @@ function openEditor() {
     editor.innerHTML = chapter.content;
     const allNoteIds = new Set([
       ...((story.globalNotes || []).map(n => n.id)),
-      ...((chapter.notes || []).map(n => n.id))
+      ...((story.chapters || []).flatMap(c => c.notes || []).map(n => n.id))
     ]);
     let editorChanged = false;
     editor.querySelectorAll('.editor-annotation, .annotation').forEach(el => {
@@ -1080,9 +1069,10 @@ function closeEditor() {
   closePopup();
 }
 
-document.getElementById("saveChapterBtn")?.addEventListener("click", async () => {
+  document.getElementById("saveChapterBtn")?.addEventListener("click", async () => {
   const chapter = getChapter();
-  if (!chapter) return;
+  const story = getStory();
+  if (!chapter || !story) return;
   chapter.title = document.getElementById("chapterTitleInput").value.trim();
   chapter.content = document.getElementById("chapterEditor").innerHTML;
   saveState(state);
@@ -1090,20 +1080,7 @@ document.getElementById("saveChapterBtn")?.addEventListener("click", async () =>
   renderReader();
   renderChapterList();
 
-  try {
-    if (_supabase) {
-      await _supabase.from('chapters').upsert({
-        id: chapter.id,
-        story_id: currentStoryId,
-        title: chapter.title,
-        content: chapter.content,
-        chapter_order: chapter.number,
-        updated_at: new Date().toISOString()
-      });
-    }
-  } catch (err) {
-    console.warn("Supabase save chapter err:", err);
-  }
+  await syncChapterToSupabase(chapter, story.id);
 });
 
 // Text selection and annotation click in reader & editor
@@ -1331,25 +1308,8 @@ function openNoteEditor(anchor) {
     renderReader();
     if (currentView === 'overviewView') renderOverview();
 
-    try {
-      if (_supabase) {
-        await _supabase.from('notes').insert({
-          id: noteId,
-          story_id: story.id,
-          chapter_id: chapter.id,
-          type: pendingNoteType,
-          selected_text: selectedText,
-          note_text: content,
-          caption: newNote.caption,
-          source: newNote.source,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
-        await _supabase.from('chapters').update({ content: chapter.content }).eq('id', chapter.id);
-      }
-    } catch (err) {
-      console.warn("Supabase note insert err:", err);
-    }
+    await syncNoteToSupabase(newNote, story.id, chapter.id);
+    await syncChapterToSupabase(chapter, story.id);
   });
 }
 
@@ -1572,20 +1532,7 @@ document.getElementById("addGlobalNoteBtn")?.addEventListener("click", async () 
   renderOverview();
   toast("Global note added");
 
-  try {
-    if (_supabase) {
-      await _supabase.from('notes').insert({
-        id: note.id,
-        story_id: story.id,
-        type: 'global',
-        selected_text: note.title,
-        note_text: note.content,
-        created_at: new Date().toISOString()
-      });
-    }
-  } catch (err) {
-    console.warn("Supabase global note err:", err);
-  }
+  await syncNoteToSupabase(note, story.id, null);
 });
 
 // ================= NAVIGATION BUTTONS =================

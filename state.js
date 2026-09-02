@@ -8,18 +8,37 @@ if (window.supabase && typeof window.supabase.createClient === 'function') {
   _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
+let _authPromise = null;
 export async function autoLogin() {
-  if (!_supabase) return;
+  if (!_supabase) return false;
   try {
-    const loginPromise = _supabase.auth.signInWithPassword({
-      email: 'lanvy1859@gmail.com',
-      password: 'lanvy1402'
-    });
-    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Login timeout')), 2500));
-    await Promise.race([loginPromise, timeoutPromise]);
-  } catch (err) {
-    console.warn('AutoLogin skipped:', err?.message || err);
+    const { data: sessionData } = await _supabase.auth.getSession();
+    if (sessionData?.session) {
+      return true;
+    }
+  } catch (e) {}
+
+  if (!_authPromise) {
+    _authPromise = (async () => {
+      try {
+        const { error } = await _supabase.auth.signInWithPassword({
+          email: 'lanvy1859@gmail.com',
+          password: 'lanvy1402'
+        });
+        if (error) {
+          console.warn('AutoLogin signIn error:', error.message);
+          return false;
+        }
+        return true;
+      } catch (err) {
+        console.warn('AutoLogin exception:', err?.message || err);
+        return false;
+      } finally {
+        setTimeout(() => { _authPromise = null; }, 5000);
+      }
+    })();
   }
+  return await _authPromise;
 }
 
 export const STORAGE_KEY = "annotated_reader_v1";
@@ -328,12 +347,120 @@ export async function syncStoryThemeToSupabase(storyId, themeColor, rawDescripti
   }
 }
 
+export async function syncNoteToSupabase(note, storyId, chapterId = null) {
+  if (!_supabase || !note || !storyId) return false;
+  try {
+    await autoLogin();
+    const effectiveChapterId = (note.type === 'global') ? (note.chapterId || null) : (chapterId || note.chapterId || null);
+    const payload = {
+      id: note.id,
+      story_id: storyId,
+      chapter_id: effectiveChapterId,
+      type: note.type || 'chapter',
+      selected_text: note.selectedText || note.title || '',
+      note_text: note.content || '',
+      caption: note.caption || '',
+      source: note.source || '',
+      category: note.category || (note.type === 'global' ? 'Term' : 'Chapter'),
+      updated_at: new Date().toISOString()
+    };
+    if (note.createdAt) {
+      payload.created_at = note.createdAt;
+    }
+
+    let { error } = await _supabase.from('notes').upsert({
+      ...payload,
+      images: Array.isArray(note.images) ? note.images : []
+    });
+
+    if (error) {
+      // Retry without images in case images column is not defined or size limit
+      const retryRes = await _supabase.from('notes').upsert(payload);
+      if (retryRes.error) {
+        console.warn('syncNoteToSupabase upsert error:', retryRes.error.message);
+        return false;
+      }
+    }
+    return true;
+  } catch (err) {
+    console.warn('syncNoteToSupabase exception:', err?.message || err);
+    return false;
+  }
+}
+
+export async function syncChapterToSupabase(chapter, storyId) {
+  if (!_supabase || !chapter || !storyId) return false;
+  try {
+    await autoLogin();
+    const { error } = await _supabase.from('chapters').upsert({
+      id: chapter.id,
+      story_id: storyId,
+      title: chapter.title || '',
+      content: chapter.content || '',
+      chapter_order: chapter.number,
+      updated_at: new Date().toISOString()
+    });
+    if (error) {
+      console.warn('syncChapterToSupabase error:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('syncChapterToSupabase exception:', err?.message || err);
+    return false;
+  }
+}
+
+export async function deleteNoteFromSupabase(noteId, storyId = null) {
+  if (!_supabase || !noteId) return false;
+  try {
+    await autoLogin();
+    const query = _supabase.from('notes').delete().eq('id', noteId);
+    if (storyId) query.eq('story_id', storyId);
+    const { error } = await query;
+    if (error) {
+      console.warn('deleteNoteFromSupabase error:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('deleteNoteFromSupabase exception:', err?.message || err);
+    return false;
+  }
+}
+
+export async function syncPendingLocalDataToSupabase(currentState) {
+  if (!_supabase || !currentState || !Array.isArray(currentState.stories)) return;
+  try {
+    await autoLogin();
+    for (const story of currentState.stories) {
+      if (story.globalNotes && Array.isArray(story.globalNotes)) {
+        for (const gn of story.globalNotes) {
+          await syncNoteToSupabase(gn, story.id, null);
+        }
+      }
+      if (story.chapters && Array.isArray(story.chapters)) {
+        for (const ch of story.chapters) {
+          await syncChapterToSupabase(ch, story.id);
+          if (ch.notes && Array.isArray(ch.notes)) {
+            for (const cn of ch.notes) {
+              await syncNoteToSupabase(cn, story.id, ch.id);
+            }
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('syncPendingLocalDataToSupabase error:', e?.message || e);
+  }
+}
+
 export async function fetchStoriesFromSupabase() {
   if (!_supabase) return null;
   try {
     await autoLogin();
   } catch (e) {}
-  const fetchWithTimeout = async (promise, ms = 6000) => {
+  const fetchWithTimeout = async (promise, ms = 8000) => {
     let timer;
     const timeoutPromise = new Promise((_, reject) => {
       timer = setTimeout(() => reject(new Error("Supabase request timed out")), ms);
@@ -371,7 +498,7 @@ export async function fetchStoriesFromSupabase() {
   const savedThemeMap = getSavedStoryThemes();
   const localFallbackState = (await loadStateFromDB()) || loadState();
 
-  return stories.map(story => {
+  const mergedStories = stories.map(story => {
     const storyChapters = chapters.filter(c => c.story_id === story.id);
     const storyNotes = notes.filter(n => n.story_id === story.id);
     const globalNotes = storyNotes.filter(n => n.type === 'global');
@@ -385,30 +512,51 @@ export async function fetchStoriesFromSupabase() {
 
     const chapterObjects = storyChapters.map(ch => {
       const localChap = (localStoryMatch?.chapters || []).find(c => c.id === ch.id);
+      const remoteChapterNotes = (chapterNotesMap[ch.id] || []).map(n => {
+        const localNote = (localChap?.notes || []).find(ln => ln.id === n.id);
+        const localImages = (localNote?.images && Array.isArray(localNote.images) && localNote.images.length > 0)
+          ? localNote.images
+          : (Array.isArray(n.images) ? n.images : []);
+
+        return {
+          id: n.id,
+          type: n.type || 'chapter',
+          selectedText: n.selected_text || localNote?.selectedText || '',
+          content: n.note_text || localNote?.content || '',
+          images: localImages,
+          caption: n.caption || localNote?.caption || '',
+          source: n.source || localNote?.source || '',
+          chapterId: ch.id,
+          createdAt: n.created_at || localNote?.createdAt || new Date().toISOString()
+        };
+      });
+
+      // Crucial: Bidirectionally merge any locally created chapter notes not yet in Supabase
+      if (localChap?.notes && Array.isArray(localChap.notes)) {
+        localChap.notes.forEach(lcn => {
+          if (!remoteChapterNotes.some(rn => rn.id === lcn.id)) {
+            remoteChapterNotes.push(lcn);
+          }
+        });
+      }
+
       return {
         id: ch.id,
         number: ch.chapter_order,
         title: ch.title,
         content: ch.content || localChap?.content || '',
-        notes: chapterNotesMap[ch.id] ? chapterNotesMap[ch.id].map(n => {
-          const localNote = (localChap?.notes || []).find(ln => ln.id === n.id);
-          const localImages = (localNote?.images && Array.isArray(localNote.images) && localNote.images.length > 0)
-            ? localNote.images
-            : (Array.isArray(n.images) ? n.images : []);
-
-          return {
-            id: n.id,
-            type: n.type || 'chapter',
-            selectedText: n.selected_text || localNote?.selectedText || '',
-            content: n.note_text || localNote?.content || '',
-            images: localImages,
-            caption: n.caption || localNote?.caption || '',
-            source: n.source || localNote?.source || '',
-            createdAt: n.created_at || localNote?.createdAt || new Date().toISOString()
-          };
-        }) : (localChap?.notes || [])
+        notes: remoteChapterNotes
       };
     });
+
+    // Also preserve any locally created chapters
+    if (localStoryMatch?.chapters && Array.isArray(localStoryMatch.chapters)) {
+      localStoryMatch.chapters.forEach(lch => {
+        if (!chapterObjects.some(co => co.id === lch.id)) {
+          chapterObjects.push(lch);
+        }
+      });
+    }
 
     const globalNoteObjects = globalNotes.map(n => {
       const localNote = (localStoryMatch?.globalNotes || []).find(ln => ln.id === n.id);
@@ -433,7 +581,7 @@ export async function fetchStoriesFromSupabase() {
     });
 
     // Also preserve any locally created global notes
-    if (localStoryMatch?.globalNotes) {
+    if (localStoryMatch?.globalNotes && Array.isArray(localStoryMatch.globalNotes)) {
       localStoryMatch.globalNotes.forEach(lgn => {
         if (!globalNoteObjects.some(gn => gn.id === lgn.id)) {
           globalNoteObjects.push(lgn);
@@ -455,4 +603,15 @@ export async function fetchStoriesFromSupabase() {
       globalNotes: globalNoteObjects
     };
   });
+
+  // Preserve local-only stories if any
+  if (localFallbackState?.stories && Array.isArray(localFallbackState.stories)) {
+    localFallbackState.stories.forEach(ls => {
+      if (!mergedStories.some(ms => ms.id === ls.id)) {
+        mergedStories.push(ls);
+      }
+    });
+  }
+
+  return mergedStories;
 }
