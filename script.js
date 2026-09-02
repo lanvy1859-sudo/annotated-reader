@@ -32,6 +32,8 @@ import {
   syncChapterToSupabase,
   deleteNoteFromSupabase,
   syncPendingLocalDataToSupabase,
+  cleanStaleAnnotations,
+  getDeletedNoteIds,
   THEME_KEY,
   ACTIVE_COLOR_KEY
 } from './state.js';
@@ -740,12 +742,24 @@ function renderReader() {
     } else {
       el.addEventListener("click", event => {
         const selection = window.getSelection();
-        if (selection && selection.toString().trim().length > 0) return;
+        if (selection && !selection.isCollapsed && selection.toString().trim().length > 0) return;
         event.stopPropagation();
         const note = (chapter.notes || []).find(n => n.id === noteId)
           || (story.globalNotes || []).find(n => n.id === noteId)
           || (story.chapters || []).flatMap(c => c.notes || []).find(n => n.id === noteId);
-        if (note) showNotePopup(note, el);
+        if (note) {
+          showNotePopup(note, el);
+        } else {
+          // Stale annotation clicked - unwrap immediately
+          const parent = el.parentNode;
+          if (parent) {
+            while (el.firstChild) parent.insertBefore(el.firstChild, el);
+            parent.removeChild(el);
+            chapter.content = reader.innerHTML;
+            saveState(state);
+            syncChapterToSupabase(chapter, story.id);
+          }
+        }
       });
     }
   });
@@ -753,6 +767,7 @@ function renderReader() {
   if (contentChanged) {
     chapter.content = reader.innerHTML;
     saveState(state);
+    syncChapterToSupabase(chapter, story.id);
   }
 }
 
@@ -807,6 +822,14 @@ function closePopup() {
     popup.style.display = 'none';
     popup.style.visibility = 'hidden';
   }
+  selectedRange = null;
+  selectedText = "";
+  try {
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) {
+      sel.removeAllRanges();
+    }
+  } catch (e) {}
 }
 
 function showNotePopup(note, anchor) {
@@ -936,7 +959,7 @@ function editNote(noteId, type, anchor) {
   `;
   openPopup(html, anchor);
   renderImageSlotsHelper("editImageSlots", editingImages, (imgs) => {
-    // Synchronize images on change
+    editingImages = imgs;
   });
 
   document.getElementById("closeEditNoteBtn")?.addEventListener("click", closePopup);
@@ -944,7 +967,7 @@ function editNote(noteId, type, anchor) {
     const newContent = document.getElementById('editNoteContent').value.trim();
     if (!newContent) return toast("Content cannot be empty");
     note.content = newContent;
-    note.images = editingImages;
+    note.images = Array.isArray(editingImages) ? [...editingImages] : [];
     note.caption = document.getElementById('editCaption').value.trim();
     note.source = document.getElementById('editSource').value.trim();
     saveState(state);
@@ -1128,7 +1151,7 @@ document.getElementById("chapterEditor")?.addEventListener("click", handleEditor
 
 function handleEditorAnnotationClick(event) {
   const selection = window.getSelection();
-  if (selection && selection.toString().trim().length > 0) return;
+  if (selection && !selection.isCollapsed && selection.toString().trim().length > 0) return;
 
   const annotationEl = event.target.closest('.editor-annotation, .annotation');
   if (!annotationEl) return;
@@ -1139,17 +1162,30 @@ function handleEditorAnnotationClick(event) {
   const chapter = getChapter();
   if (!story || !chapter || !noteId) return;
 
-  const note = chapter.notes.find(n => n.id === noteId) || story.globalNotes.find(n => n.id === noteId);
+  const note = (chapter.notes || []).find(n => n.id === noteId) || (story.globalNotes || []).find(n => n.id === noteId);
   if (note) {
     showNotePopup(note, annotationEl);
+  } else {
+    // Unstale broken annotation in editor
+    const parent = annotationEl.parentNode;
+    if (parent) {
+      while (annotationEl.firstChild) parent.insertBefore(annotationEl.firstChild, annotationEl);
+      parent.removeChild(annotationEl);
+      const editor = document.getElementById("chapterEditor");
+      if (editor) {
+        chapter.content = editor.innerHTML;
+        saveState(state);
+        syncChapterToSupabase(chapter, story.id);
+      }
+    }
   }
 }
 
 function handleTextSelection() {
   const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return;
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
   const text = selection.toString().trim();
-  if (!text || text.length === 0) return;
+  if (!text || text.length === 0 || text.length > 600) return;
 
   const range = selection.getRangeAt(0);
   const editor = document.getElementById("chapterEditor");

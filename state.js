@@ -45,6 +45,95 @@ export const STORAGE_KEY = "annotated_reader_v1";
 export const NAV_STATE_KEY = "annotated_reader_nav";
 export const THEME_KEY = "annotated_reader_theme";
 export const ACTIVE_COLOR_KEY = "annotated_reader_active_color";
+export const DELETED_NOTES_KEY = "annotated_reader_deleted_notes";
+
+// ================= DELETED NOTE TOMBSTONES =================
+export function getDeletedNoteIds() {
+  try {
+    const raw = localStorage.getItem(DELETED_NOTES_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch (e) {
+    return new Set();
+  }
+}
+
+export function addDeletedNoteId(id) {
+  if (!id) return;
+  try {
+    const set = getDeletedNoteIds();
+    set.add(id);
+    localStorage.setItem(DELETED_NOTES_KEY, JSON.stringify([...set]));
+  } catch (e) {}
+}
+
+export function removeDeletedNoteId(id) {
+  if (!id) return;
+  try {
+    const set = getDeletedNoteIds();
+    set.delete(id);
+    localStorage.setItem(DELETED_NOTES_KEY, JSON.stringify([...set]));
+  } catch (e) {}
+}
+
+// ================= ANNOTATION CLEANER =================
+export function cleanStaleAnnotations(htmlContent, validNoteIds) {
+  if (!htmlContent) return '';
+  if (!htmlContent.includes('editor-annotation') && !htmlContent.includes('annotation') && !htmlContent.includes('data-note-id')) {
+    return htmlContent;
+  }
+  const validSet = validNoteIds instanceof Set ? validNoteIds : new Set(validNoteIds || []);
+  if (typeof document === 'undefined') return htmlContent;
+  const temp = document.createElement('div');
+  temp.innerHTML = htmlContent;
+  let changed = false;
+  temp.querySelectorAll('.editor-annotation, .annotation, [data-note-id]').forEach(el => {
+    const noteId = el.dataset.noteId || el.getAttribute('data-note-id');
+    if (!noteId || !validSet.has(noteId)) {
+      const parent = el.parentNode;
+      if (parent) {
+        while (el.firstChild) {
+          parent.insertBefore(el.firstChild, el);
+        }
+        parent.removeChild(el);
+        changed = true;
+      }
+    }
+  });
+  return changed ? temp.innerHTML : htmlContent;
+}
+
+// ================= IMAGE SYNC SERIALIZATION =================
+export function embedImagesInCaption(caption, images) {
+  const cleanCaption = (caption || '').replace(/<!--images:[\s\S]*?-->/g, '').trim();
+  if (!images || !Array.isArray(images) || images.length === 0) {
+    return cleanCaption;
+  }
+  const tag = `<!--images:${JSON.stringify(images)}-->`;
+  return cleanCaption ? `${cleanCaption}\n${tag}` : tag;
+}
+
+export function extractImagesFromCaption(rawCaption, existingImages = []) {
+  if (!rawCaption || typeof rawCaption !== 'string') {
+    return { caption: rawCaption || '', images: Array.isArray(existingImages) ? existingImages : [] };
+  }
+  const match = rawCaption.match(/<!--images:([\s\S]*?)-->/);
+  let extractedImages = [];
+  if (match && match[1]) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      if (Array.isArray(parsed)) {
+        extractedImages = parsed;
+      }
+    } catch (e) {}
+  }
+  const cleanCaption = rawCaption.replace(/<!--images:[\s\S]*?-->/g, '').trim();
+  const finalImages = (extractedImages.length > 0)
+    ? extractedImages
+    : (Array.isArray(existingImages) ? existingImages : []);
+  return { caption: cleanCaption, images: finalImages };
+}
 
 // ================= INDEXEDDB PERSISTENCE =================
 const IDB_NAME = 'AnnotatedReaderDB';
@@ -351,7 +440,9 @@ export async function syncNoteToSupabase(note, storyId, chapterId = null) {
   if (!_supabase || !note || !storyId) return false;
   try {
     await autoLogin();
+    removeDeletedNoteId(note.id);
     const effectiveChapterId = (note.type === 'global') ? (note.chapterId || null) : (chapterId || note.chapterId || null);
+    const rawCaption = embedImagesInCaption(note.caption, note.images);
     const payload = {
       id: note.id,
       story_id: storyId,
@@ -359,27 +450,18 @@ export async function syncNoteToSupabase(note, storyId, chapterId = null) {
       type: note.type || 'chapter',
       selected_text: note.selectedText || note.title || '',
       note_text: note.content || '',
-      caption: note.caption || '',
+      caption: rawCaption,
       source: note.source || '',
-      category: note.category || (note.type === 'global' ? 'Term' : 'Chapter'),
       updated_at: new Date().toISOString()
     };
     if (note.createdAt) {
       payload.created_at = note.createdAt;
     }
 
-    let { error } = await _supabase.from('notes').upsert({
-      ...payload,
-      images: Array.isArray(note.images) ? note.images : []
-    });
-
+    const { error } = await _supabase.from('notes').upsert(payload);
     if (error) {
-      // Retry without images in case images column is not defined or size limit
-      const retryRes = await _supabase.from('notes').upsert(payload);
-      if (retryRes.error) {
-        console.warn('syncNoteToSupabase upsert error:', retryRes.error.message);
-        return false;
-      }
+      console.warn('syncNoteToSupabase upsert error:', error.message);
+      return false;
     }
     return true;
   } catch (err) {
@@ -413,6 +495,7 @@ export async function syncChapterToSupabase(chapter, storyId) {
 
 export async function deleteNoteFromSupabase(noteId, storyId = null) {
   if (!_supabase || !noteId) return false;
+  addDeletedNoteId(noteId);
   try {
     await autoLogin();
     const query = _supabase.from('notes').delete().eq('id', noteId);
@@ -433,10 +516,13 @@ export async function syncPendingLocalDataToSupabase(currentState) {
   if (!_supabase || !currentState || !Array.isArray(currentState.stories)) return;
   try {
     await autoLogin();
+    const deletedIds = getDeletedNoteIds();
     for (const story of currentState.stories) {
       if (story.globalNotes && Array.isArray(story.globalNotes)) {
         for (const gn of story.globalNotes) {
-          await syncNoteToSupabase(gn, story.id, null);
+          if (!deletedIds.has(gn.id)) {
+            await syncNoteToSupabase(gn, story.id, null);
+          }
         }
       }
       if (story.chapters && Array.isArray(story.chapters)) {
@@ -444,7 +530,9 @@ export async function syncPendingLocalDataToSupabase(currentState) {
           await syncChapterToSupabase(ch, story.id);
           if (ch.notes && Array.isArray(ch.notes)) {
             for (const cn of ch.notes) {
-              await syncNoteToSupabase(cn, story.id, ch.id);
+              if (!deletedIds.has(cn.id)) {
+                await syncNoteToSupabase(cn, story.id, ch.id);
+              }
             }
           }
         }
@@ -493,7 +581,19 @@ export async function fetchStoriesFromSupabase() {
 
   const stories = storiesRes.data;
   const chapters = chaptersRes?.data || [];
-  const notes = notesRes?.data || [];
+  let notes = notesRes?.data || [];
+
+  const deletedIds = getDeletedNoteIds();
+  // Filter out any tombstoned notes that might still exist on server
+  if (deletedIds.size > 0) {
+    const toDeleteRemote = notes.filter(n => deletedIds.has(n.id));
+    if (toDeleteRemote.length > 0) {
+      notes = notes.filter(n => !deletedIds.has(n.id));
+      for (const n of toDeleteRemote) {
+        _supabase.from('notes').delete().eq('id', n.id).then();
+      }
+    }
+  }
 
   const savedThemeMap = getSavedStoryThemes();
   const localFallbackState = (await loadStateFromDB()) || loadState();
@@ -509,42 +609,35 @@ export async function fetchStoriesFromSupabase() {
     });
 
     const localStoryMatch = (localFallbackState.stories || []).find(s => s.id === story.id);
+    const validStoryNoteIds = new Set(storyNotes.map(n => n.id));
 
     const chapterObjects = storyChapters.map(ch => {
       const localChap = (localStoryMatch?.chapters || []).find(c => c.id === ch.id);
       const remoteChapterNotes = (chapterNotesMap[ch.id] || []).map(n => {
         const localNote = (localChap?.notes || []).find(ln => ln.id === n.id);
-        const localImages = (localNote?.images && Array.isArray(localNote.images) && localNote.images.length > 0)
-          ? localNote.images
-          : (Array.isArray(n.images) ? n.images : []);
+        const { caption: cleanCaption, images: extractedImages } = extractImagesFromCaption(n.caption, localNote?.images || n.images);
 
         return {
           id: n.id,
           type: n.type || 'chapter',
           selectedText: n.selected_text || localNote?.selectedText || '',
           content: n.note_text || localNote?.content || '',
-          images: localImages,
-          caption: n.caption || localNote?.caption || '',
+          images: extractedImages,
+          caption: cleanCaption || localNote?.caption || '',
           source: n.source || localNote?.source || '',
           chapterId: ch.id,
           createdAt: n.created_at || localNote?.createdAt || new Date().toISOString()
         };
       });
 
-      // Crucial: Bidirectionally merge any locally created chapter notes not yet in Supabase
-      if (localChap?.notes && Array.isArray(localChap.notes)) {
-        localChap.notes.forEach(lcn => {
-          if (!remoteChapterNotes.some(rn => rn.id === lcn.id)) {
-            remoteChapterNotes.push(lcn);
-          }
-        });
-      }
+      const rawContent = ch.content || localChap?.content || '';
+      const cleanedContent = cleanStaleAnnotations(rawContent, validStoryNoteIds);
 
       return {
         id: ch.id,
         number: ch.chapter_order,
         title: ch.title,
-        content: ch.content || localChap?.content || '',
+        content: cleanedContent,
         notes: remoteChapterNotes
       };
     });
@@ -560,9 +653,7 @@ export async function fetchStoriesFromSupabase() {
 
     const globalNoteObjects = globalNotes.map(n => {
       const localNote = (localStoryMatch?.globalNotes || []).find(ln => ln.id === n.id);
-      const localImages = (localNote?.images && Array.isArray(localNote.images) && localNote.images.length > 0)
-        ? localNote.images
-        : (Array.isArray(n.images) ? n.images : []);
+      const { caption: cleanCaption, images: extractedImages } = extractImagesFromCaption(n.caption, localNote?.images || n.images);
 
       return {
         id: n.id,
@@ -571,23 +662,14 @@ export async function fetchStoriesFromSupabase() {
         title: n.selected_text || localNote?.title || localNote?.selectedText || '',
         content: n.note_text || localNote?.content || '',
         selectedText: n.selected_text || localNote?.selectedText || localNote?.title || '',
-        images: localImages,
-        caption: n.caption || localNote?.caption || '',
+        images: extractedImages,
+        caption: cleanCaption || localNote?.caption || '',
         source: n.source || localNote?.source || '',
         keywords: [n.selected_text || localNote?.title || ''],
         chapterId: n.chapter_id || localNote?.chapterId || null,
         createdAt: n.created_at || localNote?.createdAt || new Date().toISOString()
       };
     });
-
-    // Also preserve any locally created global notes
-    if (localStoryMatch?.globalNotes && Array.isArray(localStoryMatch.globalNotes)) {
-      localStoryMatch.globalNotes.forEach(lgn => {
-        if (!globalNoteObjects.some(gn => gn.id === lgn.id)) {
-          globalNoteObjects.push(lgn);
-        }
-      });
-    }
 
     const { description: cleanDesc, themeColor: embeddedTheme } = extractThemeAndCleanDescription(story.description);
     const persistentTheme = story.theme_color || embeddedTheme || savedThemeMap[story.id] || localStoryMatch?.themeColor || '#7654d8';

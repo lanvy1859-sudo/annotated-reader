@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "Annotated Reader",
+  "description": "Interactive web reader with chapter notes, global vocabulary notes, dynamic story themes, and Supabase synchronization.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
