@@ -34,6 +34,9 @@ import {
   syncPendingLocalDataToSupabase,
   cleanStaleAnnotations,
   getDeletedNoteIds,
+  uploadImageToStorage,
+  deleteImageFromStorage,
+  migrateAllBase64ImagesToStorage,
   THEME_KEY,
   ACTIVE_COLOR_KEY
 } from './state.js';
@@ -67,6 +70,8 @@ autoLogin();
 
 // ================= STATE =================
 let state = { stories: [] };
+window.appState = () => state;
+window.migrateImagesToStorage = () => migrateAllBase64ImagesToStorage(state.stories);
 let currentStoryId = null;
 let currentChapterId = null;
 let currentView = startup.isLibrary ? "libraryView" : "storyView";
@@ -546,29 +551,36 @@ document.getElementById("coverInput")?.addEventListener("change", async (event) 
   if (!story) return;
 
   try {
+    toast('Processing cover image...');
     const compressed = await compressImageFile(file, 1000, 1000, 0.82);
     story.cover = compressed || '';
     saveState(state);
     renderStory();
     renderLibrary();
-    toast('Cover updated');
 
     if (_supabase) {
       try {
-        const filePath = `covers/${Date.now()}_${file.name}`;
-        await _supabase.storage.from('reader-images').upload(filePath, file);
-        const { data } = _supabase.storage.from('reader-images').getPublicUrl(filePath);
-        if (data?.publicUrl) {
-          story.cover = data.publicUrl;
-          await _supabase.from('stories').update({ cover_url: data.publicUrl, updated_at: new Date().toISOString() }).eq('id', story.id);
+        const publicUrl = await uploadImageToStorage(compressed || file, 'covers', file.name);
+        if (publicUrl && (publicUrl.startsWith('http://') || publicUrl.startsWith('https://'))) {
+          story.cover = publicUrl;
+          await _supabase.from('stories').update({ cover_url: publicUrl, updated_at: new Date().toISOString() }).eq('id', story.id);
           saveState(state);
+          renderStory();
+          renderLibrary();
+          toast('Cover uploaded to Storage');
+        } else {
+          toast('Cover updated');
         }
       } catch (err) {
         console.warn('Storage upload error:', err);
+        toast('Cover updated locally');
       }
+    } else {
+      toast('Cover updated');
     }
   } catch (err) {
     console.error("Cover compression failed:", err);
+    toast('Failed to update cover');
   }
 });
 
@@ -870,7 +882,7 @@ function showNotePopup(note, anchor) {
     <div class="popup-selected"><span>"${escapeHTML(displayText || "")}"</span></div>
     <div class="popup-content">
       <div>${escapeHTML(note.content || "").replace(/\n/g, "<br>")}</div>
-      ${note.images?.length ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;">${note.images.map(img => `<img src="${img}" style="max-width:100%; max-height:200px; border-radius:8px; object-fit:cover;">`).join("")}</div>` : ""}
+      ${note.images?.length ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;">${note.images.map(img => `<img src="${img}" style="max-width:100%; max-height:200px; border-radius:8px; object-fit:cover; cursor:pointer;" onclick="window.open('${img}', '_blank')" title="Click to view image in full size">`).join("")}</div>` : ""}
       ${note.caption ? `<div style="font-size:12px; color:var(--muted); margin-top:6px;">${escapeHTML(note.caption)}</div>` : ""}
       ${note.source ? `<div style="font-size:12px; color:var(--muted); margin-top:4px;">📎 ${escapeHTML(note.source)}</div>` : ""}
     </div>
@@ -882,6 +894,34 @@ function showNotePopup(note, anchor) {
   document.getElementById("deleteNoteBtnTrigger")?.addEventListener("click", () => deleteNote(note.id, isGlobal ? 'global' : 'chapter'));
 }
 
+function attachPasteImageHelper(textareaEl, containerId, imagesArray, onImagesChanged) {
+  if (!textareaEl) return;
+  textareaEl.addEventListener("paste", async (e) => {
+    if (!e.clipboardData?.files?.length) return;
+    const file = Array.from(e.clipboardData.files).find(f => f.type.startsWith('image/'));
+    if (file && imagesArray.length < 4) {
+      e.preventDefault();
+      try {
+        toast("Uploading pasted image to Storage...");
+        const compressed = await compressImageFile(file, 1200, 1200, 0.82);
+        if (compressed) {
+          const uploadedUrl = await uploadImageToStorage(compressed, 'notes', 'pasted_image');
+          if (uploadedUrl && (uploadedUrl.startsWith('http://') || uploadedUrl.startsWith('https://'))) {
+            imagesArray.push(uploadedUrl);
+            renderImageSlotsHelper(containerId, imagesArray, onImagesChanged);
+            if (onImagesChanged) onImagesChanged(imagesArray);
+            toast("Pasted image uploaded to Storage");
+          } else {
+            toast("Failed to upload image to Storage");
+          }
+        }
+      } catch (err) {
+        console.error("Paste image error:", err);
+      }
+    }
+  });
+}
+
 function renderImageSlotsHelper(containerId, imagesArray, onImagesChanged) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -891,14 +931,21 @@ function renderImageSlotsHelper(containerId, imagesArray, onImagesChanged) {
     const slot = document.createElement("div");
     slot.className = "image-slot";
     slot.innerHTML = `
-      <img src="${imgSrc}" alt="Illustration ${idx + 1}" />
+      <img src="${imgSrc}" alt="Illustration ${idx + 1}" loading="lazy" style="cursor:pointer;" title="Click to view full size" />
       <button class="image-remove" type="button" title="Remove image">×</button>
     `;
-    slot.querySelector(".image-remove")?.addEventListener("click", (e) => {
+    slot.querySelector("img")?.addEventListener("click", () => {
+      window.open(imgSrc, '_blank');
+    });
+    slot.querySelector(".image-remove")?.addEventListener("click", async (e) => {
       e.stopPropagation();
+      const removedImg = imagesArray[idx];
       imagesArray.splice(idx, 1);
       renderImageSlotsHelper(containerId, imagesArray, onImagesChanged);
       if (onImagesChanged) onImagesChanged(imagesArray);
+      if (removedImg && typeof removedImg === 'string' && removedImg.includes('/reader-images/notes/')) {
+        deleteImageFromStorage(removedImg);
+      }
       toast("Image removed");
     });
     container.appendChild(slot);
@@ -923,12 +970,18 @@ function renderImageSlotsHelper(containerId, imagesArray, onImagesChanged) {
         const file = e.target.files?.[0];
         if (file) {
           try {
+            toast("Uploading image to Storage...");
             const compressed = await compressImageFile(file, 1200, 1200, 0.82);
             if (compressed) {
-              imagesArray.push(compressed);
-              renderImageSlotsHelper(containerId, imagesArray, onImagesChanged);
-              if (onImagesChanged) onImagesChanged(imagesArray);
-              toast("Image attached");
+              const uploadedUrl = await uploadImageToStorage(compressed, 'notes', file.name);
+              if (uploadedUrl && (uploadedUrl.startsWith('http://') || uploadedUrl.startsWith('https://'))) {
+                imagesArray.push(uploadedUrl);
+                renderImageSlotsHelper(containerId, imagesArray, onImagesChanged);
+                if (onImagesChanged) onImagesChanged(imagesArray);
+                toast("Image uploaded to Storage");
+              } else {
+                toast("Failed to upload image to Storage");
+              }
             }
           } catch (err) {
             console.error("Image loading error:", err);
@@ -974,10 +1027,26 @@ function editNote(noteId, type, anchor) {
     editingImages = imgs;
   });
 
+  const editArea = document.getElementById("editNoteContent");
+  attachPasteImageHelper(editArea, "editImageSlots", editingImages, (imgs) => {
+    editingImages = imgs;
+  });
+
   document.getElementById("closeEditNoteBtn")?.addEventListener("click", closePopup);
   document.getElementById('saveEditNoteBtn')?.addEventListener('click', async () => {
     const newContent = document.getElementById('editNoteContent').value.trim();
     if (!newContent) return toast("Content cannot be empty");
+
+    // Ensure all images are converted to Supabase Storage links
+    for (let i = 0; i < editingImages.length; i++) {
+      if (typeof editingImages[i] === 'string' && editingImages[i].startsWith('data:image/')) {
+        const uploadedUrl = await uploadImageToStorage(editingImages[i], 'notes', `edit_img_${i}`);
+        if (uploadedUrl && (uploadedUrl.startsWith('http://') || uploadedUrl.startsWith('https://'))) {
+          editingImages[i] = uploadedUrl;
+        }
+      }
+    }
+
     note.content = newContent;
     note.images = Array.isArray(editingImages) ? [...editingImages] : [];
     note.caption = document.getElementById('editCaption').value.trim();
@@ -1004,6 +1073,9 @@ async function deleteNote(noteId, type) {
     danger: true
   });
   if (!ok) return;
+
+  const noteToDelete = type === 'global' ? (story.globalNotes || []).find(n => n.id === noteId) : (story.chapters || []).flatMap(c => c.notes || []).find(n => n.id === noteId);
+  const imagesToDelete = Array.isArray(noteToDelete?.images) ? [...noteToDelete.images] : [];
 
   closePopup();
 
@@ -1058,7 +1130,7 @@ async function deleteNote(noteId, type) {
   if (currentView === 'readerView') renderReader();
   toast("Note deleted");
 
-  await deleteNoteFromSupabase(noteId, story.id);
+  await deleteNoteFromSupabase(noteId, story.id, imagesToDelete);
   for (const ch of story.chapters) {
     await syncChapterToSupabase(ch, story.id);
   }
@@ -1289,6 +1361,11 @@ function openNoteEditor(anchor) {
     pendingImages = imgs;
   });
 
+  const newArea = document.getElementById("newNoteContent");
+  attachPasteImageHelper(newArea, "newImageSlots", pendingImages, (imgs) => {
+    pendingImages = imgs;
+  });
+
   document.getElementById("closeNoteEditorBtn")?.addEventListener("click", closePopup);
   setTimeout(() => document.getElementById("newNoteContent")?.focus(), 80);
 
@@ -1299,6 +1376,16 @@ function openNoteEditor(anchor) {
     const chapter = getChapter();
     const story = getStory();
     if (!chapter || !story) return;
+
+    // Ensure all images are converted to Supabase Storage links before saving
+    for (let i = 0; i < pendingImages.length; i++) {
+      if (typeof pendingImages[i] === 'string' && pendingImages[i].startsWith('data:image/')) {
+        const uploadedUrl = await uploadImageToStorage(pendingImages[i], 'notes', `note_img_${i}`);
+        if (uploadedUrl && (uploadedUrl.startsWith('http://') || uploadedUrl.startsWith('https://'))) {
+          pendingImages[i] = uploadedUrl;
+        }
+      }
+    }
 
     const noteId = uid();
     const newNote = {

@@ -223,6 +223,120 @@ export function compressImageFile(file, maxWidth = 1200, maxHeight = 1200, quali
   });
 }
 
+export function dataURLToBlob(dataURL) {
+  try {
+    const parts = dataURL.split(',');
+    if (parts.length < 2) return null;
+    const mimeMatch = parts[0].match(/:(.*?);/);
+    const contentType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const b64 = parts[1].replace(/\s/g, '');
+    const raw = window.atob(b64);
+    const rawLength = raw.length;
+    const uInt8Array = new Uint8Array(rawLength);
+    for (let i = 0; i < rawLength; ++i) {
+      uInt8Array[i] = raw.charCodeAt(i);
+    }
+    return new Blob([uInt8Array], { type: contentType });
+  } catch (e) {
+    console.warn('dataURLToBlob error:', e);
+    return null;
+  }
+}
+
+export async function uploadImageToStorage(fileOrDataUrl, folder = 'notes', originalName = '') {
+  if (!fileOrDataUrl) return '';
+  // If it's already an HTTP / HTTPS link, return directly
+  if (typeof fileOrDataUrl === 'string' && (fileOrDataUrl.startsWith('http://') || fileOrDataUrl.startsWith('https://'))) {
+    return fileOrDataUrl;
+  }
+
+  try {
+    let blob = null;
+    let mime = 'image/jpeg';
+    let ext = 'jpg';
+
+    if (typeof fileOrDataUrl === 'string' && fileOrDataUrl.startsWith('data:')) {
+      try {
+        const fetchRes = await fetch(fileOrDataUrl);
+        blob = await fetchRes.blob();
+        mime = blob.type || 'image/jpeg';
+      } catch (fErr) {
+        blob = dataURLToBlob(fileOrDataUrl);
+        if (blob) mime = blob.type || 'image/jpeg';
+      }
+    } else if (fileOrDataUrl instanceof Blob || fileOrDataUrl instanceof File) {
+      blob = fileOrDataUrl;
+      mime = blob.type || 'image/jpeg';
+    }
+
+    if (!blob) {
+      console.warn('uploadImageToStorage: unable to create blob from input');
+      return '';
+    }
+
+    if (mime.includes('png')) ext = 'png';
+    else if (mime.includes('webp')) ext = 'webp';
+    else if (mime.includes('gif')) ext = 'gif';
+    else ext = 'jpg';
+
+    const cleanBaseName = (originalName || 'img')
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_\-]/g, '_')
+      .slice(0, 30);
+    const fileName = `${Date.now()}_${cleanBaseName || 'image'}.${ext}`;
+    const filePath = `${folder}/${fileName}`;
+
+    // Upload directly using Supabase Storage REST endpoint with public anon key (SUPABASE_KEY)
+    // The bucket 'reader-images' has public anon upload policy; passing anon Bearer avoids 403 RLS violation.
+    const uploadUrl = `${SUPABASE_URL}/storage/v1/object/reader-images/${filePath}`;
+    const res = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': mime,
+        'x-upsert': 'true'
+      },
+      body: blob
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn(`Supabase storage upload error (HTTP ${res.status}):`, errText);
+      return '';
+    }
+
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/reader-images/${filePath}`;
+    return publicUrl;
+  } catch (err) {
+    console.warn('uploadImageToStorage exception:', err?.message || err);
+    return '';
+  }
+}
+
+export async function deleteImageFromStorage(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== 'string') return;
+  try {
+    if (imageUrl.includes('/storage/v1/object/public/reader-images/')) {
+      const path = imageUrl.split('/storage/v1/object/public/reader-images/')[1];
+      if (path) {
+        const decodedPath = decodeURIComponent(path);
+        await fetch(`${SUPABASE_URL}/storage/v1/object/reader-images`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ prefixes: [decodedPath] })
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('deleteImageFromStorage error:', err);
+  }
+}
+
 export function uid() {
   return "id_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
 }
@@ -438,6 +552,39 @@ export async function syncNoteToSupabase(note, storyId, chapterId = null) {
     await autoLogin();
     removeDeletedNoteId(note.id);
     const effectiveChapterId = (note.type === 'global') ? (note.chapterId || null) : (chapterId || note.chapterId || null);
+
+    // Auto-convert any base64 images to Supabase Storage links
+    if (note.images && Array.isArray(note.images)) {
+      let imagesUpdated = false;
+      for (let i = 0; i < note.images.length; i++) {
+        const img = note.images[i];
+        if (typeof img === 'string' && img.startsWith('data:image/')) {
+          const uploadedUrl = await uploadImageToStorage(img, 'notes', `note_${note.id}_${i}`);
+          if (uploadedUrl && (uploadedUrl.startsWith('http://') || uploadedUrl.startsWith('https://'))) {
+            note.images[i] = uploadedUrl;
+            imagesUpdated = true;
+          }
+        }
+      }
+      if (imagesUpdated) {
+        try {
+          const localState = loadState();
+          let matched = false;
+          (localState.stories || []).forEach(s => {
+            (s.globalNotes || []).forEach(gn => {
+              if (gn.id === note.id) { gn.images = [...note.images]; matched = true; }
+            });
+            (s.chapters || []).forEach(ch => {
+              (ch.notes || []).forEach(cn => {
+                if (cn.id === note.id) { cn.images = [...note.images]; matched = true; }
+              });
+            });
+          });
+          if (matched) saveState(localState);
+        } catch (e) {}
+      }
+    }
+
     const rawCaption = embedImagesInCaption(note.caption, note.images);
     const payload = {
       id: note.id,
@@ -489,7 +636,7 @@ export async function syncChapterToSupabase(chapter, storyId) {
   }
 }
 
-export async function deleteNoteFromSupabase(noteId, storyId = null) {
+export async function deleteNoteFromSupabase(noteId, storyId = null, images = []) {
   if (!_supabase || !noteId) return false;
   addDeletedNoteId(noteId);
   try {
@@ -500,6 +647,13 @@ export async function deleteNoteFromSupabase(noteId, storyId = null) {
     if (error) {
       console.warn('deleteNoteFromSupabase error:', error.message);
       return false;
+    }
+    if (Array.isArray(images) && images.length > 0) {
+      for (const img of images) {
+        if (typeof img === 'string' && img.includes('/reader-images/notes/')) {
+          deleteImageFromStorage(img);
+        }
+      }
     }
     return true;
   } catch (err) {
@@ -700,5 +854,77 @@ export async function fetchStoriesFromSupabase() {
     });
   }
 
+  // Trigger background migration for any lingering Base64 images to Supabase Storage links
+  setTimeout(() => {
+    migrateAllBase64ImagesToStorage(mergedStories).catch(e => console.warn('Background migration error:', e));
+  }, 200);
+
   return mergedStories;
+}
+
+export async function migrateAllBase64ImagesToStorage(stories) {
+  if (!_supabase || !Array.isArray(stories)) return;
+  try {
+    let hasChanges = false;
+    for (const story of stories) {
+      if (story.cover && typeof story.cover === 'string' && story.cover.startsWith('data:image/')) {
+        const publicUrl = await uploadImageToStorage(story.cover, 'covers', `cover_${story.id}`);
+        if (publicUrl && (publicUrl.startsWith('http://') || publicUrl.startsWith('https://'))) {
+          story.cover = publicUrl;
+          await _supabase.from('stories').update({ cover_url: publicUrl, updated_at: new Date().toISOString() }).eq('id', story.id);
+          hasChanges = true;
+        }
+      }
+
+      for (const gn of (story.globalNotes || [])) {
+        if (gn.images && Array.isArray(gn.images)) {
+          let noteChanged = false;
+          for (let i = 0; i < gn.images.length; i++) {
+            if (typeof gn.images[i] === 'string' && gn.images[i].startsWith('data:image/')) {
+              const publicUrl = await uploadImageToStorage(gn.images[i], 'notes', `gn_${gn.id}_${i}`);
+              if (publicUrl && (publicUrl.startsWith('http://') || publicUrl.startsWith('https://'))) {
+                gn.images[i] = publicUrl;
+                noteChanged = true;
+                hasChanges = true;
+              }
+            }
+          }
+          if (noteChanged) {
+            await syncNoteToSupabase(gn, story.id, null);
+          }
+        }
+      }
+
+      for (const ch of (story.chapters || [])) {
+        for (const cn of (ch.notes || [])) {
+          if (cn.images && Array.isArray(cn.images)) {
+            let noteChanged = false;
+            for (let i = 0; i < cn.images.length; i++) {
+              if (typeof cn.images[i] === 'string' && cn.images[i].startsWith('data:image/')) {
+                const publicUrl = await uploadImageToStorage(cn.images[i], 'notes', `cn_${cn.id}_${i}`);
+                if (publicUrl && (publicUrl.startsWith('http://') || publicUrl.startsWith('https://'))) {
+                  cn.images[i] = publicUrl;
+                  noteChanged = true;
+                  hasChanges = true;
+                }
+              }
+            }
+            if (noteChanged) {
+              await syncNoteToSupabase(cn, story.id, ch.id);
+            }
+          }
+        }
+      }
+    }
+
+    if (hasChanges) {
+      try {
+        const localState = loadState();
+        localState.stories = stories;
+        saveState(localState);
+      } catch (e) {}
+    }
+  } catch (err) {
+    console.warn('migrateAllBase64ImagesToStorage error:', err);
+  }
 }
