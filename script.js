@@ -1362,14 +1362,26 @@ function openNoteEditor(anchor) {
 }
 
 // ================= OVERVIEW & SEARCH =================
+function sortNotesNewestFirst(list) {
+  return [...(list || [])].sort((a, b) => {
+    const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    if (tA && tB && tA !== tB) return tB - tA;
+    if (tA && !tB) return -1;
+    if (!tA && tB) return 1;
+    return (b.id || '').localeCompare(a.id || '');
+  });
+}
+
 function renderOverview() {
   const story = getStory();
   if (!story) return;
   updateSearchModeUI();
   const globalList = document.getElementById("globalNotesList");
   if (globalList) {
-    globalList.innerHTML = story.globalNotes.length ? "" : `<p class="muted">No global notes yet.</p>`;
-    story.globalNotes.forEach(note => {
+    const sortedGlobalNotes = sortNotesNewestFirst(story.globalNotes || []);
+    globalList.innerHTML = sortedGlobalNotes.length ? "" : `<p class="muted">No global notes yet.</p>`;
+    sortedGlobalNotes.forEach(note => {
       const item = document.createElement("div");
       item.className = "note-list-item";
       const hasImage = Boolean(note.images && note.images.length > 0);
@@ -1402,9 +1414,10 @@ function renderOverview() {
 
   const chapList = document.getElementById("chapterNotesList");
   if (chapList) {
-    const allChapNotes = story.chapters.flatMap(c => c.notes.map(n => ({ ...n, chapterNumber: c.number, chapterId: c.id })));
-    chapList.innerHTML = allChapNotes.length ? "" : `<p class="muted">No chapter notes yet.</p>`;
-    allChapNotes.forEach(note => {
+    const allChapNotes = (story.chapters || []).flatMap(c => (c.notes || []).map(n => ({ ...n, chapterNumber: c.number, chapterId: c.id })));
+    const sortedChapNotes = sortNotesNewestFirst(allChapNotes);
+    chapList.innerHTML = sortedChapNotes.length ? "" : `<p class="muted">No chapter notes yet.</p>`;
+    sortedChapNotes.forEach(note => {
       const item = document.createElement("div");
       item.className = "note-list-item";
       const hasImage = Boolean(note.images && note.images.length > 0);
@@ -1471,24 +1484,45 @@ function runOverviewSearch() {
     const targetChapterNum = numMatch ? parseInt(numMatch[1], 10) : null;
 
     if (targetChapterNum !== null) {
-      const targetChapter = (story.chapters || []).find(c => c.number === targetChapterNum);
-      if (targetChapter) {
-        const chapterNotes = targetChapter.notes || [];
-        const globalNotesForChap = (story.globalNotes || []).filter(gn => gn.chapterId === targetChapter.id);
-        const combinedNotes = [...chapterNotes, ...globalNotesForChap];
+      const targetChapters = (story.chapters || []).filter(c => {
+        if (c.number === targetChapterNum) return true;
+        const titleNum = (c.title || '').match(/\b0*(\d+)\b/);
+        return titleNum && parseInt(titleNum[1], 10) === targetChapterNum;
+      });
 
-        combinedNotes.forEach(n => {
+      targetChapters.forEach(targetChapter => {
+        // ONLY notes categorized as chapter notes from this chapter, sorted newest first
+        const chapterNotes = sortNotesNewestFirst(targetChapter.notes || []);
+
+        chapterNotes.forEach(n => {
           const hasImage = Boolean(n.images && n.images.length > 0);
           const starHtml = hasImage ? `<span class="note-star-icon" title="Includes illustration">★</span>` : '';
-          const title = n.title || n.selectedText || "Untitled Note";
+          const title = n.selectedText || n.title || "Untitled Note";
           matches.push({
-            source: `CHAPTER ${targetChapter.number} NOTE`,
+            source: `CHAPTER ${targetChapter.number}`,
             titleHtml: `${escapeHTML(title)} ${starHtml}`,
             content: n.content || "",
             act: () => openChapter(targetChapter.id, n.id)
           });
         });
-      }
+      });
+    } else {
+      // If user typed chapter title text (e.g. "Child of the Wind")
+      const matchedChapters = (story.chapters || []).filter(c => (c.title || '').toLowerCase().includes(q));
+      matchedChapters.forEach(targetChapter => {
+        const chapterNotes = sortNotesNewestFirst(targetChapter.notes || []);
+        chapterNotes.forEach(n => {
+          const hasImage = Boolean(n.images && n.images.length > 0);
+          const starHtml = hasImage ? `<span class="note-star-icon" title="Includes illustration">★</span>` : '';
+          const title = n.selectedText || n.title || "Untitled Note";
+          matches.push({
+            source: `CHAPTER ${targetChapter.number}`,
+            titleHtml: `${escapeHTML(title)} ${starHtml}`,
+            content: n.content || "",
+            act: () => openChapter(targetChapter.id, n.id)
+          });
+        });
+      });
     }
   } else {
     story.globalNotes.forEach(n => {
