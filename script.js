@@ -31,12 +31,22 @@ import {
   syncNoteToSupabase,
   syncChapterToSupabase,
   deleteNoteFromSupabase,
+  deleteStoryFromSupabase,
+  deleteChapterFromSupabase,
+  addDeletedStoryId,
+  addDeletedChapterId,
+  addDeletedNoteId,
   syncPendingLocalDataToSupabase,
   cleanStaleAnnotations,
   getDeletedNoteIds,
+  getDeletedStoryIds,
+  getDeletedChapterIds,
   uploadImageToStorage,
   deleteImageFromStorage,
   migrateAllBase64ImagesToStorage,
+  getReaderFontPrefs,
+  saveReaderFontPrefs,
+  applyReaderFontPrefs,
   THEME_KEY,
   ACTIVE_COLOR_KEY
 } from './state.js';
@@ -46,15 +56,17 @@ import {
   toast,
   showConfirmDialog,
   showPromptDialog,
-  openThemeCustomizerModal
+  openThemeCustomizerModal,
+  openReaderFontModal
 } from './modal.js';
 
-// ================= SYNC INITIAL STARTUP THEME =================
-// Crucial: Set the story theme immediately on line 1 before progress or async calls
+// ================= SYNC INITIAL STARTUP THEME & FONT =================
+// Crucial: Set the story theme & font immediately on line 1 before progress or async calls
 const startup = getSynchronousStartupTheme();
 let currentTheme = startup.isDark ? "dark" : "light";
 document.documentElement.setAttribute("data-theme", currentTheme);
 applyStoryTheme(startup.themeColor || '#7654d8');
+applyReaderFontPrefs();
 
 const player = document.getElementById('bookAnim');
 if (player) {
@@ -170,8 +182,9 @@ async function initApp() {
       state = loadState();
     }
 
+    applyReaderFontPrefs();
     const supabaseStories = await fetchStoriesFromSupabase();
-    if (supabaseStories && supabaseStories.length > 0) {
+    if (Array.isArray(supabaseStories)) {
       state.stories = supabaseStories;
       saveState(state);
     }
@@ -323,8 +336,8 @@ function renderLibrary() {
   if (!state.stories || state.stories.length === 0) {
     grid.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--muted);">
-        <p style="font-size: 18px; margin-bottom: 15px;">No stories in your library yet.</p>
-        <button class="btn primary" id="emptyAddStoryBtn">＋ Add New Story</button>
+        <p style="font-size: 18px; margin-bottom: 15px;">Chưa có truyện nào trong thư viện.</p>
+        <button class="btn primary" id="emptyAddStoryBtn">＋ Thêm truyện mới</button>
       </div>
     `;
     document.getElementById("emptyAddStoryBtn")?.addEventListener("click", () => {
@@ -338,6 +351,12 @@ function renderLibrary() {
     const card = document.createElement("div");
     card.className = "story-card";
     card.innerHTML = `
+      <button class="story-card-delete-btn" data-card-delete="${story.id}" title="Xóa truyện này" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </button>
       <div class="story-card-cover">
         ${story.cover ? `<img src="${story.cover}" alt="">` : `<div class="cover-empty" style="color:${themeHex};">✦</div>`}
       </div>
@@ -349,7 +368,15 @@ function renderLibrary() {
         </div>
       </div>
     `;
-    card.addEventListener("click", () => openStory(story.id));
+    card.addEventListener("click", (e) => {
+      const delBtn = e.target.closest("[data-card-delete]");
+      if (delBtn) {
+        e.stopPropagation();
+        confirmAndDeleteStory(delBtn.getAttribute("data-card-delete"));
+        return;
+      }
+      openStory(story.id);
+    });
     grid.appendChild(card);
   });
 }
@@ -508,36 +535,53 @@ document.getElementById("saveStoryBtn")?.addEventListener("click", async () => {
   renderLibrary();
 });
 
-document.getElementById("deleteStoryBtn")?.addEventListener("click", async () => {
-  const story = getStory();
+async function confirmAndDeleteStory(storyId) {
+  const story = state.stories.find(s => s.id === storyId);
   if (!story) return;
   const ok = await showConfirmDialog({
     title: "Delete Story",
-    message: `Are you sure you want to delete "${story.title || 'Untitled Story'}"?\n\nAll ${story.chapters?.length || 0} chapters and annotations will be removed.`,
+    message: `Are you sure you want to delete "${story.title || 'Untitled Story'}"?\n\nAll ${story.chapters?.length || 0} chapters and annotations will be removed and synchronized across all your devices.`,
     confirmText: "Delete Story",
     cancelText: "Cancel",
     danger: true
   });
   if (!ok) return;
 
-  const storyId = story.id;
+  const coverUrl = story.cover;
+  addDeletedStoryId(storyId);
+  (story.chapters || []).forEach(ch => {
+    addDeletedChapterId(ch.id);
+    (ch.notes || []).forEach(cn => addDeletedNoteId(cn.id));
+  });
+  (story.globalNotes || []).forEach(gn => addDeletedNoteId(gn.id));
+
   state.stories = state.stories.filter(s => s.id !== storyId);
-  currentStoryId = null;
-  currentChapterId = null;
+  if (currentStoryId === storyId) {
+    currentStoryId = null;
+    currentChapterId = null;
+    clearNavigationState();
+    showView('libraryView');
+  }
   saveState(state);
-  clearNavigationState();
   renderLibrary();
-  showView('libraryView');
   toast("Story deleted");
 
   try {
-    if (_supabase) {
-      await _supabase.from('notes').delete().eq('story_id', storyId);
-      await _supabase.from('chapters').delete().eq('story_id', storyId);
-      await _supabase.from('stories').delete().eq('id', storyId);
+    const success = await deleteStoryFromSupabase(storyId);
+    if (success) {
+      if (coverUrl && typeof coverUrl === 'string' && coverUrl.includes('/reader-images/covers/')) {
+        deleteImageFromStorage(coverUrl);
+      }
+      toast("Story deleted & synced to cloud");
     }
   } catch (err) {
-    console.warn("Supabase delete err:", err);
+    console.warn("deleteStoryFromSupabase error:", err);
+  }
+}
+
+document.getElementById("deleteStoryBtn")?.addEventListener("click", () => {
+  if (currentStoryId) {
+    confirmAndDeleteStory(currentStoryId);
   }
 });
 
@@ -634,6 +678,9 @@ async function deleteChapter(chapterId) {
   });
   if (!ok) return;
 
+  addDeletedChapterId(chapterId);
+  (chapter.notes || []).forEach(cn => addDeletedNoteId(cn.id));
+
   story.chapters = story.chapters.filter(c => c.id !== chapterId);
   story.chapters.sort((a,b) => a.number - b.number).forEach((ch, idx) => { ch.number = idx + 1; });
   if (currentChapterId === chapterId) {
@@ -645,14 +692,7 @@ async function deleteChapter(chapterId) {
   renderChapterList();
   toast(`Chapter deleted`);
 
-  try {
-    if (_supabase) {
-      await _supabase.from('notes').delete().eq('chapter_id', chapterId);
-      await _supabase.from('chapters').delete().eq('id', chapterId);
-    }
-  } catch (err) {
-    console.warn("Supabase delete chapter err:", err);
-  }
+  await deleteChapterFromSupabase(chapterId, story.id);
 }
 
 // ================= OPEN CHAPTER / READER =================
@@ -1800,6 +1840,15 @@ document.getElementById("storyPaletteBtn")?.addEventListener("click", () => {
   });
 });
 
+// Reader font & typography modal
+document.getElementById("readerFontBtn")?.addEventListener("click", () => {
+  openReaderFontModal(getReaderFontPrefs(), (newPrefs) => {
+    saveReaderFontPrefs(newPrefs);
+    applyReaderFontPrefs(newPrefs);
+    toast("Đã lưu tùy chỉnh phông chữ đọc");
+  });
+});
+
 // Theme switches
 document.querySelectorAll(".theme-toggle").forEach(btn => {
   btn.addEventListener("click", (e) => {
@@ -1867,6 +1916,8 @@ document.addEventListener("keydown", (e) => {
     closePopup();
     document.getElementById("chapterDrawer")?.classList.remove("open");
     document.getElementById("storyThemeModal")?.classList.remove("active");
+    document.getElementById("readerFontModal")?.classList.remove("active");
+    document.getElementById("customConfirmModal")?.classList.remove("active");
   }
 });
 

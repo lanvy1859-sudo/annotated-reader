@@ -1,10 +1,10 @@
 import { getSavedStoryThemes, saveStoryTheme } from './theme.js';
 
-const SUPABASE_URL = 'https://elkdtrlumfghrsykqvty.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsa2R0cmx1bWZnaHJzeWtxdnR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2MzA3NTksImV4cCI6MjEwMzIwNjc1OX0.mZPwCV_lE2-0HozC8xAQ58pFtkbZK91eY62wAelXo6s';
+const SUPABASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || 'https://elkdtrlumfghrsykqvty.supabase.co';
+const SUPABASE_KEY = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsa2R0cmx1bWZnaHJzeWtxdnR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2MzA3NTksImV4cCI6MjEwMzIwNjc1OX0.mZPwCV_lE2-0HozC8xAQ58pFtkbZK91eY62wAelXo6s';
 
 export let _supabase = null;
-if (window.supabase && typeof window.supabase.createClient === 'function') {
+if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
   _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
@@ -46,8 +46,50 @@ export const NAV_STATE_KEY = "annotated_reader_nav";
 export const THEME_KEY = "annotated_reader_theme";
 export const ACTIVE_COLOR_KEY = "annotated_reader_active_color";
 export const DELETED_NOTES_KEY = "annotated_reader_deleted_notes";
+export const DELETED_STORIES_KEY = "annotated_reader_deleted_stories";
+export const DELETED_CHAPTERS_KEY = "annotated_reader_deleted_chapters";
+export const FONT_PREF_KEY = "annotated_reader_font_pref";
 
-// ================= DELETED NOTE TOMBSTONES =================
+// ================= VIETNAMESE FONT & TYPOGRAPHY PRESETS =================
+export const FONT_OPTIONS = [
+  { id: 'literata', name: 'Literata', sub: 'Chuyên đọc sách (Mặc định)', family: "'Literata', 'Merriweather', 'Be Vietnam Pro', serif" },
+  { id: 'vietnam', name: 'Be Vietnam Pro', sub: 'Hiện đại, chuẩn tiếng Việt', family: "'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" },
+  { id: 'merriweather', name: 'Merriweather', sub: 'Serif trang nhã, sắc nét', family: "'Merriweather', 'Literata', serif" },
+  { id: 'sans', name: 'Inter / System', sub: 'Không chân, gọn gàng', family: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }
+];
+
+export function getReaderFontPrefs() {
+  try {
+    const raw = localStorage.getItem(FONT_PREF_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.fontId) return parsed;
+    }
+  } catch (e) {}
+  return {
+    fontId: 'literata',
+    fontSize: 18,
+    lineHeight: 1.95
+  };
+}
+
+export function saveReaderFontPrefs(prefs) {
+  try {
+    localStorage.setItem(FONT_PREF_KEY, JSON.stringify(prefs));
+  } catch (e) {}
+}
+
+export function applyReaderFontPrefs(prefs = null) {
+  const p = prefs || getReaderFontPrefs();
+  const matched = FONT_OPTIONS.find(f => f.id === p.fontId) || FONT_OPTIONS[0];
+  if (typeof document !== 'undefined') {
+    document.documentElement.style.setProperty('--reader-font-family', matched.family);
+    document.documentElement.style.setProperty('--reader-font-size', (p.fontSize || 18) + 'px');
+    document.documentElement.style.setProperty('--reader-line-height', (p.lineHeight || 1.95).toString());
+  }
+}
+
+// ================= DELETED TOMBSTONES =================
 export function getDeletedNoteIds() {
   try {
     const raw = localStorage.getItem(DELETED_NOTES_KEY);
@@ -74,6 +116,64 @@ export function removeDeletedNoteId(id) {
     const set = getDeletedNoteIds();
     set.delete(id);
     localStorage.setItem(DELETED_NOTES_KEY, JSON.stringify([...set]));
+  } catch (e) {}
+}
+
+export function getDeletedStoryIds() {
+  try {
+    const raw = localStorage.getItem(DELETED_STORIES_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch (e) {
+    return new Set();
+  }
+}
+
+export function addDeletedStoryId(id) {
+  if (!id) return;
+  try {
+    const set = getDeletedStoryIds();
+    set.add(id);
+    localStorage.setItem(DELETED_STORIES_KEY, JSON.stringify([...set]));
+  } catch (e) {}
+}
+
+export function removeDeletedStoryId(id) {
+  if (!id) return;
+  try {
+    const set = getDeletedStoryIds();
+    set.delete(id);
+    localStorage.setItem(DELETED_STORIES_KEY, JSON.stringify([...set]));
+  } catch (e) {}
+}
+
+export function getDeletedChapterIds() {
+  try {
+    const raw = localStorage.getItem(DELETED_CHAPTERS_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch (e) {
+    return new Set();
+  }
+}
+
+export function addDeletedChapterId(id) {
+  if (!id) return;
+  try {
+    const set = getDeletedChapterIds();
+    set.add(id);
+    localStorage.setItem(DELETED_CHAPTERS_KEY, JSON.stringify([...set]));
+  } catch (e) {}
+}
+
+export function removeDeletedChapterId(id) {
+  if (!id) return;
+  try {
+    const set = getDeletedChapterIds();
+    set.delete(id);
+    localStorage.setItem(DELETED_CHAPTERS_KEY, JSON.stringify([...set]));
   } catch (e) {}
 }
 
@@ -636,6 +736,52 @@ export async function syncChapterToSupabase(chapter, storyId) {
   }
 }
 
+export async function deleteStoryFromSupabase(storyId) {
+  if (!storyId) return false;
+  addDeletedStoryId(storyId);
+  if (!_supabase) return false;
+  try {
+    await autoLogin();
+    // Cascade delete: notes -> chapters -> stories
+    const { error: noteErr } = await _supabase.from('notes').delete().eq('story_id', storyId);
+    if (noteErr) console.warn('deleteStory notes err:', noteErr.message);
+
+    const { error: chErr } = await _supabase.from('chapters').delete().eq('story_id', storyId);
+    if (chErr) console.warn('deleteStory chapters err:', chErr.message);
+
+    const { error: storyErr } = await _supabase.from('stories').delete().eq('id', storyId);
+    if (storyErr) {
+      console.warn('deleteStory stories err:', storyErr.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('deleteStoryFromSupabase exception:', err?.message || err);
+    return false;
+  }
+}
+
+export async function deleteChapterFromSupabase(chapterId, storyId = null) {
+  if (!chapterId) return false;
+  addDeletedChapterId(chapterId);
+  if (!_supabase) return false;
+  try {
+    await autoLogin();
+    await _supabase.from('notes').delete().eq('chapter_id', chapterId);
+    const query = _supabase.from('chapters').delete().eq('id', chapterId);
+    if (storyId) query.eq('story_id', storyId);
+    const { error: chErr } = await query;
+    if (chErr) {
+      console.warn('deleteChapter chapters err:', chErr.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('deleteChapterFromSupabase exception:', err?.message || err);
+    return false;
+  }
+}
+
 export async function deleteNoteFromSupabase(noteId, storyId = null, images = []) {
   if (!_supabase || !noteId) return false;
   addDeletedNoteId(noteId);
@@ -666,8 +812,26 @@ export async function syncPendingLocalDataToSupabase(currentState) {
   if (!_supabase || !currentState || !Array.isArray(currentState.stories)) return;
   try {
     await autoLogin();
+    const deletedStoryIds = getDeletedStoryIds();
+    const deletedChapterIds = getDeletedChapterIds();
     const deletedIds = getDeletedNoteIds();
+
     for (const story of currentState.stories) {
+      if (deletedStoryIds.has(story.id)) continue;
+
+      if (story._isOfflinePending) {
+        const descWithTag = embedThemeInDescription(story.description, story.themeColor);
+        const { error } = await _supabase.from('stories').upsert({
+          id: story.id,
+          title: story.title,
+          description: descWithTag,
+          cover_url: story.cover || null,
+          theme_color: story.themeColor || '#7654d8',
+          updated_at: new Date().toISOString()
+        });
+        if (!error) delete story._isOfflinePending;
+      }
+
       if (story.globalNotes && Array.isArray(story.globalNotes)) {
         for (const gn of story.globalNotes) {
           if (gn._isOfflinePending && !deletedIds.has(gn.id)) {
@@ -678,6 +842,8 @@ export async function syncPendingLocalDataToSupabase(currentState) {
       }
       if (story.chapters && Array.isArray(story.chapters)) {
         for (const ch of story.chapters) {
+          if (deletedChapterIds.has(ch.id)) continue;
+
           if (ch._isOfflinePending) {
             const ok = await syncChapterToSupabase(ch, story.id);
             if (ok) delete ch._isOfflinePending;
@@ -721,7 +887,8 @@ export async function fetchStoriesFromSupabase() {
       _supabase.from('stories').select('*').order('created_at', { ascending: true })
     );
     if (storiesRes?.error) throw storiesRes.error;
-    if (!storiesRes?.data || storiesRes.data.length === 0) return null;
+    if (!storiesRes?.data) return null;
+    if (storiesRes.data.length === 0) return []; // Valid empty library from cloud
 
     chaptersRes = await fetchWithTimeout(
       _supabase.from('chapters').select('*').order('chapter_order', { ascending: true })
@@ -734,17 +901,42 @@ export async function fetchStoriesFromSupabase() {
     return null;
   }
 
-  const stories = storiesRes.data;
-  const chapters = chaptersRes?.data || [];
+  let stories = storiesRes.data || [];
+  let chapters = chaptersRes?.data || [];
   let notes = notesRes?.data || [];
 
+  const deletedStoryIds = getDeletedStoryIds();
+  const deletedChapterIds = getDeletedChapterIds();
   const deletedIds = getDeletedNoteIds();
-  // Filter out any tombstoned notes that might still exist on server
-  if (deletedIds.size > 0) {
-    const toDeleteRemote = notes.filter(n => deletedIds.has(n.id));
+
+  // 1. Purge any stories on server that were tombstoned by this client
+  if (deletedStoryIds.size > 0) {
+    const toDeleteRemote = stories.filter(s => deletedStoryIds.has(s.id));
     if (toDeleteRemote.length > 0) {
+      stories = stories.filter(s => !deletedStoryIds.has(s.id));
+      for (const s of toDeleteRemote) {
+        deleteStoryFromSupabase(s.id).then();
+      }
+    }
+  }
+
+  // 2. Purge any chapters on server that were tombstoned
+  if (deletedChapterIds.size > 0) {
+    const toDeleteRemoteChapters = chapters.filter(c => deletedChapterIds.has(c.id));
+    if (toDeleteRemoteChapters.length > 0) {
+      chapters = chapters.filter(c => !deletedChapterIds.has(c.id));
+      for (const c of toDeleteRemoteChapters) {
+        deleteChapterFromSupabase(c.id).then();
+      }
+    }
+  }
+
+  // 3. Purge any notes on server that were tombstoned
+  if (deletedIds.size > 0) {
+    const toDeleteRemoteNotes = notes.filter(n => deletedIds.has(n.id));
+    if (toDeleteRemoteNotes.length > 0) {
       notes = notes.filter(n => !deletedIds.has(n.id));
-      for (const n of toDeleteRemote) {
+      for (const n of toDeleteRemoteNotes) {
         _supabase.from('notes').delete().eq('id', n.id).then();
       }
     }
@@ -754,8 +946,8 @@ export async function fetchStoriesFromSupabase() {
   const localFallbackState = (await loadStateFromDB()) || loadState();
 
   const mergedStories = stories.map(story => {
-    const storyChapters = chapters.filter(c => c.story_id === story.id);
-    const storyNotes = notes.filter(n => n.story_id === story.id);
+    const storyChapters = chapters.filter(c => c.story_id === story.id && !deletedChapterIds.has(c.id));
+    const storyNotes = notes.filter(n => n.story_id === story.id && !deletedIds.has(n.id));
     const globalNotes = storyNotes.filter(n => n.type === 'global');
 
     const chapterNotesMap = {};
@@ -802,11 +994,13 @@ export async function fetchStoriesFromSupabase() {
       };
     });
 
-    // Also preserve any locally created chapters
+    // CRITICAL: Only preserve chapters created offline that have not been synced yet
     if (localStoryMatch?.chapters && Array.isArray(localStoryMatch.chapters)) {
       localStoryMatch.chapters.forEach(lch => {
-        if (!chapterObjects.some(co => co.id === lch.id)) {
-          chapterObjects.push(lch);
+        if (lch._isOfflinePending && !deletedChapterIds.has(lch.id)) {
+          if (!chapterObjects.some(co => co.id === lch.id)) {
+            chapterObjects.push(lch);
+          }
         }
       });
     }
@@ -845,11 +1039,14 @@ export async function fetchStoriesFromSupabase() {
     };
   });
 
-  // Preserve local-only stories if any
+  // CRITICAL: NEVER resurrect previously-synced stories that are no longer on Supabase!
+  // Only preserve brand-new local stories that were created while offline (_isOfflinePending) and not tombstoned:
   if (localFallbackState?.stories && Array.isArray(localFallbackState.stories)) {
     localFallbackState.stories.forEach(ls => {
-      if (!mergedStories.some(ms => ms.id === ls.id)) {
-        mergedStories.push(ls);
+      if (ls._isOfflinePending && !deletedStoryIds.has(ls.id)) {
+        if (!mergedStories.some(ms => ms.id === ls.id)) {
+          mergedStories.push(ls);
+        }
       }
     });
   }

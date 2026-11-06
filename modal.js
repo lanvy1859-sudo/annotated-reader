@@ -1,4 +1,5 @@
 import { COLOR_PRESETS, generateStoryPalette, applyStoryTheme, saveStoryTheme, extractDominantColor } from './theme.js';
+import { FONT_OPTIONS } from './state.js';
 
 export function escapeHTML(str = "") {
   return String(str)
@@ -321,6 +322,172 @@ export function openThemeCustomizerModal(story, onApply) {
     applyStoryTheme(story.themeColor);
     cleanup();
     if (onApply) onApply(story);
+  });
+
+  modal.onclick = (e) => {
+    if (e.target === modal) cleanup();
+  };
+}
+
+export function openReaderFontModal(currentPrefs, onApply) {
+  let tempFontId = currentPrefs?.fontId || 'literata';
+  let tempFontSize = currentPrefs?.fontSize || 18;
+  let tempLineHeight = currentPrefs?.lineHeight || 1.95;
+
+  let modal = document.getElementById("readerFontModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "readerFontModal";
+    modal.className = "custom-modal-overlay";
+    document.body.appendChild(modal);
+  }
+
+  function getFontFamily(fontId) {
+    const f = FONT_OPTIONS.find(x => x.id === fontId);
+    return f ? f.family : FONT_OPTIONS[0].family;
+  }
+
+  modal.innerHTML = `
+    <div class="custom-modal-dialog font-modal-dialog">
+      <div class="custom-modal-header">
+        <h3>
+          <span>Aa</span> Cài đặt font chữ đọc truyện
+        </h3>
+        <button class="custom-modal-close" id="fontModalCloseBtn" type="button">×</button>
+      </div>
+      <div class="custom-modal-body">
+        <p style="margin:0 0 14px; font-size:13px; color:var(--muted);">
+          Chọn font chữ tối ưu chuẩn tiếng Việt (không bị lỗi nhảy dấu, vỡ font) và cỡ chữ thoải mái cho mắt bạn:
+        </p>
+
+        <!-- Font Family Options -->
+        <label class="popup-section-label">Phông chữ (Font Family)</label>
+        <div class="font-options-grid" id="fontFamilyOptions">
+          ${FONT_OPTIONS.map(f => `
+            <div class="font-chip ${f.id === tempFontId ? 'active' : ''}" data-font-id="${f.id}" style="font-family:${f.family};">
+              <div class="font-chip-name">${escapeHTML(f.name)}</div>
+              <div class="font-chip-sub">${escapeHTML(f.sub)}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Font Size Controls -->
+        <label class="popup-section-label" style="margin-top:16px;">Cỡ chữ (Font Size)</label>
+        <div class="font-size-row">
+          <button class="size-adj-btn" id="fontDecBtn" type="button" title="Giảm cỡ chữ">A−</button>
+          <div class="size-chips-wrapper">
+            ${[15, 16, 17, 18, 20, 22, 24].map(sz => `
+              <button class="size-chip ${sz === tempFontSize ? 'active' : ''}" data-size="${sz}" type="button">${sz}px</button>
+            `).join('')}
+          </div>
+          <button class="size-adj-btn" id="fontIncBtn" type="button" title="Tăng cỡ chữ">A+</button>
+        </div>
+
+        <!-- Line Height Controls -->
+        <label class="popup-section-label" style="margin-top:16px;">Khoảng cách dòng (Line Height)</label>
+        <div class="line-height-row">
+          <button class="lh-chip ${tempLineHeight === 1.7 ? 'active' : ''}" data-lh="1.7" type="button">Gọn (1.7)</button>
+          <button class="lh-chip ${tempLineHeight === 1.95 ? 'active' : ''}" data-lh="1.95" type="button">Chuẩn sách (1.95)</button>
+          <button class="lh-chip ${tempLineHeight === 2.2 ? 'active' : ''}" data-lh="2.2" type="button">Rộng rãi (2.2)</button>
+        </div>
+
+        <!-- Live Preview -->
+        <label class="popup-section-label" style="margin-top:18px;">Xem trước văn bản tiếng Việt</label>
+        <div class="font-preview-box" id="fontLivePreviewBox" style="font-family:${getFontFamily(tempFontId)}; font-size:${tempFontSize}px; line-height:${tempLineHeight};">
+          <p style="margin:0 0 8px 0; font-weight:600; color:var(--text);">Chương 1: Khởi đầu một hành trình mới</p>
+          <p style="margin:0; color:var(--paper-text);">
+            “Thế giới này rộng lớn biết bao, những câu chuyện được viết ra từ trái tim sẽ luôn tìm được người lắng nghe.”
+            Văn bản hiển thị trơn tru, đầy đủ dấu huyền, sắc, hỏi, ngã, nặng và phụ âm đ/ê/ô/ơ/ư tiếng Việt.
+          </p>
+        </div>
+      </div>
+      <div class="custom-modal-footer">
+        <button class="btn ghost" id="resetDefaultFontBtn" type="button">Mặc định (Literata 18px)</button>
+        <button class="btn ghost" id="fontModalCancelBtn" type="button">Hủy</button>
+        <button class="btn primary" id="applyFontBtn" type="button">Áp dụng</button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add("active");
+
+  const previewBox = document.getElementById("fontLivePreviewBox");
+
+  function updatePreview() {
+    if (previewBox) {
+      previewBox.style.fontFamily = getFontFamily(tempFontId);
+      previewBox.style.fontSize = tempFontSize + 'px';
+      previewBox.style.lineHeight = tempLineHeight.toString();
+    }
+    // Update active classes
+    document.querySelectorAll('#fontFamilyOptions .font-chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.fontId === tempFontId);
+    });
+    document.querySelectorAll('.size-chip').forEach(c => {
+      c.classList.toggle('active', Number(c.dataset.size) === tempFontSize);
+    });
+    document.querySelectorAll('.lh-chip').forEach(c => {
+      c.classList.toggle('active', Math.abs(Number(c.dataset.lh) - tempLineHeight) < 0.05);
+    });
+  }
+
+  document.querySelectorAll('#fontFamilyOptions .font-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      tempFontId = chip.dataset.fontId;
+      updatePreview();
+    });
+  });
+
+  document.querySelectorAll('.size-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      tempFontSize = Number(chip.dataset.size);
+      updatePreview();
+    });
+  });
+
+  document.querySelectorAll('.lh-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      tempLineHeight = Number(chip.dataset.lh);
+      updatePreview();
+    });
+  });
+
+  document.getElementById("fontDecBtn")?.addEventListener("click", () => {
+    if (tempFontSize > 14) {
+      tempFontSize -= 1;
+      updatePreview();
+    }
+  });
+
+  document.getElementById("fontIncBtn")?.addEventListener("click", () => {
+    if (tempFontSize < 28) {
+      tempFontSize += 1;
+      updatePreview();
+    }
+  });
+
+  document.getElementById("resetDefaultFontBtn")?.addEventListener("click", () => {
+    tempFontId = 'literata';
+    tempFontSize = 18;
+    tempLineHeight = 1.95;
+    updatePreview();
+  });
+
+  const cleanup = () => {
+    modal.classList.remove("active");
+  };
+
+  document.getElementById("fontModalCloseBtn")?.addEventListener("click", cleanup);
+  document.getElementById("fontModalCancelBtn")?.addEventListener("click", cleanup);
+
+  document.getElementById("applyFontBtn")?.addEventListener("click", () => {
+    const updated = {
+      fontId: tempFontId,
+      fontSize: tempFontSize,
+      lineHeight: tempLineHeight
+    };
+    cleanup();
+    if (onApply) onApply(updated);
   });
 
   modal.onclick = (e) => {

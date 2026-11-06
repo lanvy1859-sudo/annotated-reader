@@ -3,12 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MemoReader</title>
+  <title>Annotated Reader</title>
   <meta name="description" content="Interactive web reader with chapter notes, global vocabulary notes, dynamic story themes, and Supabase synchronization." />
   <meta property="og:title" content="Annotated Reader" />
   <meta property="og:description" content="Interactive web reader with chapter notes, global vocabulary notes, dynamic story themes, and Supabase synchronization." />
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/png" href="/star(2).png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <!-- ===== Lottie Player ===== -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -154,6 +157,9 @@
                 </span>
                 <span class="theme-toggle-label">Light</span>
               </span>
+            </button>
+            <button class="btn ghost reader-font-btn" id="readerFontBtn" type="button" title="Tùy chỉnh font chữ & cỡ chữ" aria-label="Tùy chỉnh font">
+              <span style="font-family:'Literata', serif; font-size:14px; font-weight:600;">Aa</span>
             </button>
             <button class="btn ghost" id="overviewBtn">Overview</button>
             <button class="btn ghost" id="toggleEditBtn">Edit Mode</button>
